@@ -1,5 +1,5 @@
 <!-- Footer -->
-	<div class="prefooter py-3 {{ ($active == 'home' || $active == 'blog' ) ? 'bg-white' : '' }}">
+	<div class="prefooter py-3 {{ (($active ?? '') == 'home' || ($active ?? '') == 'blog') ? 'bg-white' : '' }}">
 		<div class="container">
 			<div class="text-center azul-marino">
 				<div class="logos mb-3">
