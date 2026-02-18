@@ -58,10 +58,12 @@
 			<a class="dropdown-item" href="http://gab.mrlucky.com.mx/ventasnew/" target="_blank">{!! trans('web.pedidos') !!}</a>
 			<a class="dropdown-item" href="http://gab.mrlucky.com.mx/english/trazabilidad/index.html" target="_blank">{!! trans('web.trazabilidad') !!}</a>
 			<a class="dropdown-item" href="http://gab.mrlucky.com.mx/english/productos.php" target="_blank">{!! trans('web.cosecha_dia') !!}</a>
+			<a class="dropdown-item" href="{{ route('en.certificados_ranchos') }}">Ranch certificates</a>
 			@else
 			<a class="dropdown-item" href="http://gab.mrlucky.com.mx/ventasnew/" target="_blank">{!! trans('web.pedidos') !!}</a>
 			<a class="dropdown-item" href="http://gab.mrlucky.com.mx/trazabilidad/index.html" target="_blank">{!! trans('web.trazabilidad') !!}</a>
 			<a class="dropdown-item" href="http://gab.mrlucky.com.mx/productos.php" target="_blank">{!! trans('web.cosecha_dia') !!}</a>
+			<a class="dropdown-item" href="{{ route('es.certificados_ranchos') }}">Certificados de ranchos</a>
 			@endif
 		</div>
 	</div>
@@ -107,10 +109,12 @@
 			<li><a class="menu__item" href="http://mrlucky.com.mx/ventasnew/" target="_blank">{!! trans('web.pedidos') !!}</a></li>
 			<li><a class="menu__item" href="http://gab.mrlucky.com.mx/english/trazabilidad/index.html" target="_blank">{!! trans('web.trazabilidad') !!}</a></li>
 			<li><a class="menu__item" href="http://gab.mrlucky.com.mx/english/productos.php" target="_blank">{!! trans('web.cosecha_dia') !!}</a></li>
+			<li><a class="menu__item" href="{{ route('en.certificados_ranchos') }}">Ranch certificates</a></li>
 			@else
 			<li><a class="menu__item" href="http://mrlucky.com.mx/ventasnew/" target="_blank">{!! trans('web.pedidos') !!}</a></li>
 			<li><a class="menu__item" href="http://gab.mrlucky.com.mx/trazabilidad/index.html" target="_blank">{!! trans('web.trazabilidad') !!}</a></li>
 			<li><a class="menu__item" href="http://gab.mrlucky.com.mx/productos.php" target="_blank">{!! trans('web.cosecha_dia') !!}</a></li>
+			<li><a class="menu__item" href="{{ route('es.certificados_ranchos') }}">Certificados de ranchos</a></li>
 			@endif
 		</ul>
 

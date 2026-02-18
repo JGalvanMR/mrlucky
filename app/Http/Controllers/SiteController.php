@@ -156,6 +156,41 @@ class SiteController extends Controller
         return view('site.pages.compromiso', compact('idioma'));
     }
 
+    /*----------  Certificados de Ranchos  ----------*/
+    public function certificadosRanchos()
+    {
+        $idioma = $this->getLang();
+
+        $ranchos = [
+            [
+                'nombre' => 'Rancho San Miguel',
+                'ubicacion' => 'Guanajuato, México',
+                'certificados' => [
+                    ['nombre' => 'CCOF Orgánico 2024', 'archivo' => '/site/certificaciones/ccof2024.pdf'],
+                    ['nombre' => 'SQF 2024', 'archivo' => '/site/certificaciones/sqf2024.pdf'],
+                ],
+            ],
+            [
+                'nombre' => 'Rancho La Esperanza',
+                'ubicacion' => 'Michoacán, México',
+                'certificados' => [
+                    ['nombre' => 'Kosher 2024', 'archivo' => '/site/certificaciones/kosher2024.pdf'],
+                    ['nombre' => 'SMETA', 'archivo' => '/site/certificaciones/smeta.pdf'],
+                ],
+            ],
+            [
+                'nombre' => 'Rancho El Milagro',
+                'ubicacion' => 'Puebla, México',
+                'certificados' => [
+                    ['nombre' => 'C-TPAT 2024', 'archivo' => '/site/certificaciones/c-tpat2024.pdf'],
+                    ['nombre' => 'Fair Trade USA', 'archivo' => '/site/certificaciones/FTUSA_CRT.pdf'],
+                ],
+            ],
+        ];
+
+        return view('site.pages.certificados-ranchos', compact('idioma', 'ranchos'));
+    }
+
     /*----------  Productos  ----------*/
     public function productos()
     {
