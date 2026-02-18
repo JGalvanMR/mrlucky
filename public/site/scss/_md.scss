@@ -1,0 +1,53 @@
+body{
+
+	/*----------  Entrada elementos  ----------*/
+	// [data-entrance] { visibility: hidden; }
+
+	header{
+
+	}
+
+	/*----------  Section somos  ----------*/
+	.section-somos{
+		.somos-text{
+			transform: translateY(-30px);
+		}
+	}
+
+	/*----------  Section visión  ----------*/
+	.section-vision{
+		padding-bottom: 150px !important;
+	}
+
+	/*----------  Section comprometidos  ----------*/
+	.section-comprometidos{
+		position: relative;
+		padding-top: 200px;
+
+		.imagen{
+			//transform:translateY(-140px);
+			position: absolute;
+			top: -140px;
+			left: 0;
+			right: 0;
+			text-align: center;
+		}
+	}
+
+
+	/*----------  Prefooter  ----------*/
+	.prefooter{
+		.container{
+			position: relative;
+			
+			.logos{
+				display: inline-block;
+				position: absolute;
+				left: 0;
+				bottom: 0;
+				margin-bottom: 0 !important;
+			}
+		}
+	}
+
+}
