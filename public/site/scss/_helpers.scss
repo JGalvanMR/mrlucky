@@ -1,0 +1,221 @@
+/*----------  Section Parallax  ----------*/
+.section-parallax{
+	min-height: 60vh;
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+	overflow-x: hidden !important;
+}
+
+/*----------  Background color  ----------*/
+.bg-azul-marino{
+	background-color: $azulMarino;
+}
+.bg-azul{
+	background-color: $azul;
+}
+.bg-verde{
+	background-color: $verde;
+}
+.bg-verde-claro{
+	background-color: $verdeClaro;
+}
+.bg-naranja{
+	background-color: $naranja;
+}
+.bg-rojo{
+	background-color: $rojo;
+}
+.bg-gris{
+	background-color: $gris;
+}
+.bg-gris-claro{
+	background-color: $grisClaro;
+}
+.bg-lila{
+	background-color: $lila;
+}
+.bg-azul-claro{
+	background-color: $azulClaro;
+}
+.bg-amarillo{
+	background-color: $amarillo;
+}
+.bg-azul-cielo{
+	background-color: $azulCielo;
+}
+
+
+
+/*----------  Text color  ----------*/
+.azul-marino{
+	color: $azulMarino;
+}
+.azul{
+	color: $azul;
+}
+.verde{
+	color: $verde;
+}
+.verde-claro{
+	color: $verdeClaro;
+}
+.naranja{
+	color: $naranja;
+}
+.rojo{
+	color: $rojo;
+}
+.gris{
+	color: $gris;
+}
+.gris-claro{
+	color: $grisClaro;
+}
+.lila{
+	color: $lila;
+}
+.azul-claro{
+	color: $azulClaro;
+}
+.amarillo{
+	color: $amarillo;
+}
+.azul-cielo{
+	color: $azulCielo;
+}
+
+
+
+/*----------  Max Width  ----------*/
+.m200{
+	max-width: 200px;
+}
+.m300{
+	max-width: 300px;
+}
+.m400{
+	max-width: 400px;
+}
+.m500{
+	max-width: 500px;
+}
+.m600{
+	max-width: 600px;
+}
+.m700{
+	max-width: 700px;
+}
+.m800{
+	max-width: 800px;
+}
+.m900{
+	max-width: 900px;
+}
+.m1000{
+	max-width: 1000px;
+}
+
+
+/*----------  Font Weight  ----------*/
+.f100{
+	font-weight: 100 !important;
+}
+.f200{
+	font-weight: 200 !important;
+}
+.f300{
+	font-weight: 300 !important;
+}
+.f400{
+	font-weight: 400 !important;
+}
+.f500{
+	font-weight: 500 !important;
+}
+.f600{
+	font-weight: 600 !important;
+}
+.f800{
+	font-weight: 800 !important;
+}
+.f900{
+	font-weight: 900 !important;
+}
+
+/*----------  Opacity  ----------*/
+.opacity-10{
+	opacity: .1;
+}
+.opacity-20{
+	opacity: .2;
+}
+.opacity-30{
+	opacity: .3;
+}
+.opacity-40{
+	opacity: .4;
+}
+.opacity-50{
+	opacity: .5;
+}
+.opacity-60{
+	opacity: .6;
+}
+.opacity-70{
+	opacity: .7;
+}
+.opacity-80{
+	opacity: .8;
+}
+.opacity-90{
+	opacity: .9;
+}
+
+/*----------  Line Height  ----------*/
+.lh-1-5{
+	line-height: 1.5em;
+}
+.lh-2{
+	line-height: 2em;
+}
+
+/*----------  Viewport Heihgt  ----------*/
+.vh40{
+	min-height: 40vh;
+}
+.vh50{
+	min-height: 50vh;
+}
+.vh60{
+	min-height: 60vh;
+}
+.vh70{
+	min-height: 70vh;
+}
+.vh80{
+	min-height: 80vh;
+}
+
+/*----------  Validator  ----------*/
+.with-errors li{
+	color: $rojo;
+}
+
+/*----------  WhatsApp Chat  ----------*/
+.floating-wpp-head span{
+	color: #fff;
+	font-weight: 600;
+}
+
+.button{
+	padding: 10px 40px;
+	border-radius: 30px;
+	text-decoration: none;
+
+	&:hover{
+		text-decoration: none;
+	}
+}
+
+

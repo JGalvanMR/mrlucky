@@ -1,0 +1,39 @@
+/*----------  Colores  ----------*/
+$azulMarino: #003ca6;
+$naranja: #ebb650;
+$amarillo: #ffd52f;
+$verde: #56b276;
+$verdeClaro: #93b820;
+$azul: #316690;
+$rojo: #db0632;
+$gris: #7c8ba0;
+$grisClaro: #e1e1e1;
+$lila: #a539bc;
+$azulClaro: #00a1ba;
+$azulCielo: #1d9ee4;
+
+@import '_fonts';
+@import '_xs';
+
+// Small devices (landscape phones, 576px and up)
+@media (min-width: 576px) {
+	@import '_sm';
+}
+
+// Medium devices (tablets, 768px and up)
+@media (min-width: 768px) {
+	@import '_md';
+}
+
+// Large devices (desktops, 992px and up)
+@media (min-width: 992px) {
+	@import '_lg';
+}
+
+// Extra large devices (large desktops, 1200px and up)
+@media (min-width: 1200px) {
+	@import '_xl';
+}
+
+@import '_helpers';
+@import '_burguer';

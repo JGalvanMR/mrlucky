@@ -1,0 +1,2 @@
+
+{!! $row->ciudad->ciudad ?? '--' !!}
