@@ -17,17 +17,6 @@
       0 => 'ChinLeung\\MultilingualRoutes\\MultilingualRoutesServiceProvider',
     ),
   ),
-  'facade/ignition' => 
-  array (
-    'providers' => 
-    array (
-      0 => 'Facade\\Ignition\\IgnitionServiceProvider',
-    ),
-    'aliases' => 
-    array (
-      'Flare' => 'Facade\\Ignition\\Facades\\Flare',
-    ),
-  ),
   'fruitcake/laravel-cors' => 
   array (
     'providers' => 
@@ -55,13 +44,6 @@
     'aliases' => 
     array (
       'Image' => 'Intervention\\Image\\Facades\\Image',
-    ),
-  ),
-  'laravel/sail' => 
-  array (
-    'providers' => 
-    array (
-      0 => 'Laravel\\Sail\\SailServiceProvider',
     ),
   ),
   'laravel/sanctum' => 
@@ -105,13 +87,6 @@
     'providers' => 
     array (
       0 => 'Carbon\\Laravel\\ServiceProvider',
-    ),
-  ),
-  'nunomaduro/collision' => 
-  array (
-    'providers' => 
-    array (
-      0 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
     ),
   ),
   'rappasoft/laravel-livewire-tables' => 
