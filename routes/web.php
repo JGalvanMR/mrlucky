@@ -37,6 +37,7 @@ Route::get('/trazabilidad/traza_pt_esp.php', [SiteController::class, 'trazabilid
 Route::get('/ventas/embarques.php', [SiteController::class, 'embarques'])->name('es.embarques');
 Route::get('/sisgabweb', [SiteController::class, 'sisgabweb'])->name('es.sisgabweb');
 Route::get('/ventas/monitor_pc.php', [SiteController::class, 'monitorVentas'])->name('es.monitorVentas');
+Route::get('/certificados-ranchos', [SiteController::class, 'certificadosRanchos'])->name('es.certificados_ranchos');
 
 //Rutas GAB - INGLES
 Route::get('/en/ventasnew', [SiteController::class, 'ventasnew'])->name('en.ventasnew');
@@ -50,6 +51,7 @@ Route::get('/en/trazabilidad/traza_pt_ing.php', [SiteController::class, 'trazabi
 Route::get('/en/ventas/embarques.php', [SiteController::class, 'embarques'])->name('en.embarques');
 Route::get('/en/sisgabweb', [SiteController::class, 'sisgabweb'])->name('en.sisgabweb');
 Route::get('en/ventas/monitor_pc.php', [SiteController::class, 'monitorVentas'])->name('en.monitorVentas');
+Route::get('/en/ranch-certificates', [SiteController::class, 'certificadosRanchos'])->name('en.certificados_ranchos');
 
 
 //http://mrlucky.com.mx/english/trazabilidad/traza_ing_pti.php?id_codigo=3619918TOVM2DAS001006
@@ -411,4 +413,3 @@ Route::group(['prefix'=>'admin', 'middleware'=>'auth'], function(){
 
 	});
 });
-
