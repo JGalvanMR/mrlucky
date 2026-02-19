@@ -1,13 +1,13 @@
 <?php return array (
   'chinleung/laravel-locales' => 
   array (
-    'providers' => 
-    array (
-      0 => 'ChinLeung\\LaravelLocales\\LaravelLocalesServiceProvider',
-    ),
     'aliases' => 
     array (
       'LaravelLocales' => 'ChinLeung\\LaravelLocales\\LaravelLocalesFacade',
+    ),
+    'providers' => 
+    array (
+      0 => 'ChinLeung\\LaravelLocales\\LaravelLocalesServiceProvider',
     ),
   ),
   'chinleung/laravel-multilingual-routes' => 
@@ -15,6 +15,17 @@
     'providers' => 
     array (
       0 => 'ChinLeung\\MultilingualRoutes\\MultilingualRoutesServiceProvider',
+    ),
+  ),
+  'facade/ignition' => 
+  array (
+    'aliases' => 
+    array (
+      'Flare' => 'Facade\\Ignition\\Facades\\Flare',
+    ),
+    'providers' => 
+    array (
+      0 => 'Facade\\Ignition\\IgnitionServiceProvider',
     ),
   ),
   'fruitcake/laravel-cors' => 
@@ -26,24 +37,31 @@
   ),
   'geo-sot/laravel-env-editor' => 
   array (
-    'providers' => 
-    array (
-      0 => 'GeoSot\\EnvEditor\\ServiceProvider',
-    ),
     'aliases' => 
     array (
       'EnvEditor' => 'GeoSot\\EnvEditor\\Facades\\EnvEditor',
     ),
+    'providers' => 
+    array (
+      0 => 'GeoSot\\EnvEditor\\ServiceProvider',
+    ),
   ),
   'intervention/image' => 
   array (
+    'aliases' => 
+    array (
+      'Image' => 'Intervention\\Image\\Facades\\Image',
+    ),
     'providers' => 
     array (
       0 => 'Intervention\\Image\\ImageServiceProvider',
     ),
-    'aliases' => 
+  ),
+  'laravel/sail' => 
+  array (
+    'providers' => 
     array (
-      'Image' => 'Intervention\\Image\\Facades\\Image',
+      0 => 'Laravel\\Sail\\SailServiceProvider',
     ),
   ),
   'laravel/sanctum' => 
@@ -89,6 +107,13 @@
       0 => 'Carbon\\Laravel\\ServiceProvider',
     ),
   ),
+  'nunomaduro/collision' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
+    ),
+  ),
   'rappasoft/laravel-livewire-tables' => 
   array (
     'providers' => 
@@ -119,13 +144,13 @@
   ),
   'vinkla/hashids' => 
   array (
-    'providers' => 
-    array (
-      0 => 'Vinkla\\Hashids\\HashidsServiceProvider',
-    ),
     'aliases' => 
     array (
       'Hashids' => 'Vinkla\\Hashids\\Facades\\Hashids',
+    ),
+    'providers' => 
+    array (
+      0 => 'Vinkla\\Hashids\\HashidsServiceProvider',
     ),
   ),
 );
