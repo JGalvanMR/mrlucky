@@ -1,5 +1,6 @@
  @php
     $config = new Larapack\ConfigWriter\Repository('rentas');
+    $active = $active ?? '';
 @endphp
 <!DOCTYPE html>
 <html lang="en">

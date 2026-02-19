@@ -1,5 +1,9 @@
 @extends('site.layouts.master')
 
+@php
+    $active = 'certificados-ranchos';
+@endphp
+
 @section('page')
 <section class="py-5 bg-light">
     <div class="container">
