@@ -1,12 +1,12 @@
 @php
-    $config = new Larapack\ConfigWriter\Repository('rentas');
+$config = new Larapack\ConfigWriter\Repository('rentas');
 @endphp
 <style>
-    {{-- Sidebar --}}
-    .sidebar-nav ul li a{ color: {{ $config->get('colorEnlaces') }};  }
-    .sidebar-nav > ul > li.active > a{ color: {{ $config->get('colorEnlaces') }};  }
-    .sidebar-nav > ul > li > a i{ color: {{ $config->get('colorEnlaces') }}; }
-    .sidebar-nav > ul > li.active > a i{ color: {{ $config->get('colorEnlaces') }}; }
+{{-- Sidebar --}}
+.sidebar-nav ul li a{ color: {{ $config->get('colorEnlaces') }}; }
+.sidebar-nav > ul > li.active > a{ color: {{ $config->get('colorEnlaces') }}; }
+.sidebar-nav > ul > li > a i{ color: {{ $config->get('colorEnlaces') }}; }
+.sidebar-nav > ul > li.active > a i{ color: {{ $config->get('colorEnlaces') }}; }
 </style>
 <aside class="left-sidebar" style="background-color: {{ $config->get('colorPrincipal') }};">
     <!-- Sidebar scroll-->
@@ -65,7 +65,7 @@
                         <li><a href="{{ route('posts') }}">Listado</a></li>
                     </ul>
                 </li>
-                
+
                 <li class="user-profile">
                     <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false">
                         <i class="fa fa-tags"></i> <span class="hide-menu">Categorías Recetas</span>
@@ -106,6 +106,18 @@
                         <li><a href="{{ route('vacantes') }}">Listado</a></li>
                     </ul>
                 </li>
+
+                <li class="user-profile">
+                    <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false">
+                        <i class="fa fa-certificate"></i>
+                        <span class="hide-menu">Ranchos & Cert.</span>
+                    </a>
+                    <ul aria-expanded="false" class="collapse">
+                        <li><a href="{{ route('ranchos.agregar_form') }}">Agregar</a></li>
+                        <li><a href="{{ route('ranchos') }}">Listado</a></li>
+                    </ul>
+                </li>
+
 
                 <li class="user-profile">
                     <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false">
@@ -169,28 +181,28 @@
                     </a>
                     <ul aria-expanded="false" class="collapse">
                         <li><a href="{{ route('components_date') }}">Date</a></li>
-                        <li><a href="{{ route('components_summernote') }}">Summernote</a></li>
-                        <li><a href="{{ route('components_toggle') }}">Bootstrap Toggle</a></li>
-                        <li><a href="{{ route('components_datatables') }}">Data Tables</a></li>
-                        <li><a href="{{ route('components_eliminar') }}">Btn Eliminar</a></li>
-                        <li><a href="{{ route('components_select2') }}">Select2</a></li>
-                        <li><a href="{{ route('components_money') }}">MaskMoney</a></li>
-                        <li><a href="{{ route('components_colorpicker') }}">ColorPicker</a></li>
-                        <li><a href="{{ route('components_tagsinput') }}">TagsInput</a></li>
-                        <li><a href="{{ route('components_fileinput') }}">FileInput</a></li>
-                        <li><a href="{{ route('components_slugify') }}">Slugify</a></li>
-                        <li><a href="{{ route('components_maxlength') }}">Maxlength</a></li>
-                        <li><a href="{{ route('components_fontpicker') }}">FontPicker</a></li>
-                        <li><a href="{{ route('components_iconpicker') }}">IconPicker</a></li>
-                    </ul>
-                </li> --}}
+                <li><a href="{{ route('components_summernote') }}">Summernote</a></li>
+                <li><a href="{{ route('components_toggle') }}">Bootstrap Toggle</a></li>
+                <li><a href="{{ route('components_datatables') }}">Data Tables</a></li>
+                <li><a href="{{ route('components_eliminar') }}">Btn Eliminar</a></li>
+                <li><a href="{{ route('components_select2') }}">Select2</a></li>
+                <li><a href="{{ route('components_money') }}">MaskMoney</a></li>
+                <li><a href="{{ route('components_colorpicker') }}">ColorPicker</a></li>
+                <li><a href="{{ route('components_tagsinput') }}">TagsInput</a></li>
+                <li><a href="{{ route('components_fileinput') }}">FileInput</a></li>
+                <li><a href="{{ route('components_slugify') }}">Slugify</a></li>
+                <li><a href="{{ route('components_maxlength') }}">Maxlength</a></li>
+                <li><a href="{{ route('components_fontpicker') }}">FontPicker</a></li>
+                <li><a href="{{ route('components_iconpicker') }}">IconPicker</a></li>
+            </ul>
+            </li> --}}
 
 
-                <li class="user-profile">
-                    <a class="waves-effect waves-dark" href="{{ url('salir') }}" aria-expanded="false">
-                        <i class="fa fa-power-off"></i> <span class="hide-menu">Salir </span>
-                    </a>
-                </li>
+            <li class="user-profile">
+                <a class="waves-effect waves-dark" href="{{ url('salir') }}" aria-expanded="false">
+                    <i class="fa fa-power-off"></i> <span class="hide-menu">Salir </span>
+                </a>
+            </li>
 
             </ul>
         </nav>

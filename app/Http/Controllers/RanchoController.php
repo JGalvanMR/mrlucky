@@ -1,179 +1,193 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Http\Controllers\CertificacionController;
+use Illuminate\Http\Request;
 use App\Models\Rancho;
 use App\Models\TipoCertificacion;
 use App\Models\Certificacion;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
-use Vinkla\Hashids\Facades\Hashids;
+use App\Http\Controllers\CertificacionController;
+use Hashids;
+use Storage;
+use File;
+use Str;
 
 class RanchoController extends Controller
 {
-    // ── Listado ──────────────────────────────────────────────────────────────
-
-    /**
-     * Listado de todos los ranchos en el panel admin.
-     * Incluye certificaciones para mostrar estado en la tabla.
-     */
+    /*----------  Listado  ----------*/
     public function index()
     {
         $ranchos = Rancho::withTrashed()
-                         ->with(['certificaciones.tipoCertificacion'])
-                         ->orderBy('orden')
-                         ->orderBy('nombre')
+                         ->with(['certificacion.tipoCertificacion'])
+                         ->orderBy('orden', 'ASC')
+                         ->orderBy('nombre', 'ASC')
                          ->get();
 
-        return view('admin.ranchos.index', compact('ranchos'));
+        return view('admin.modules.ranchos.index', compact('ranchos'));
     }
 
-    // ── Agregar ──────────────────────────────────────────────────────────────
-
+    /*----------  Agregar Form  ----------*/
     public function agregarForm()
     {
-        $tiposCertificacion = TipoCertificacion::activos()->get();
+        $tiposCertificacion = TipoCertificacion::where('activo', true)
+                                               ->orderBy('orden', 'ASC')
+                                               ->get();
 
-        return view('admin.ranchos.form', compact('tiposCertificacion'));
+        return view('admin.modules.ranchos.agregar', compact('tiposCertificacion'));
     }
 
+    /*----------  Agregar  ----------*/
     public function agregar(Request $request)
     {
-        $request->validate([
-            'nombre'                => 'required|string|max:150',
-            'ubicacion'             => 'required|string|max:200',
-            'municipio'             => 'nullable|string|max:100',
-            'estado'                => 'nullable|string|max:100',
-            'orden'                 => 'nullable|integer|min:0',
-            'imagen'                => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
-            // Certificación (opcional al crear)
-            'tipo_certificacion_id' => 'nullable|exists:tipos_certificacion,id',
-            'numero_certificado'    => 'nullable|string|max:100',
-            'fecha_emision'         => 'nullable|required_with:tipo_certificacion_id|date',
-            'fecha_vencimiento'     => 'nullable|required_with:tipo_certificacion_id|date|after:fecha_emision',
-            'organismo_auditor'     => 'nullable|string|max:200',
-            'pdf'                   => 'nullable|mimes:pdf|max:20480',
-        ]);
+        $rancho = new Rancho;
+        $data   = $request->all();
 
-        $rancho = new Rancho($request->only([
-            'nombre', 'ubicacion', 'municipio', 'estado', 'orden',
-        ]));
-        $rancho->activo = $request->boolean('activo', true);
-        $rancho->slug   = Str::slug($request->nombre);
+        // Imagen — se sube por separado vía subirImagen(), llega como campo hidden
+        $data['imagen'] = str_replace(',', '', $request->imagen);
 
-        // Subir imagen a disco público
-        if ($request->hasFile('imagen')) {
-            $rancho->imagen = $request->file('imagen')->store('ranchos', 'public');
+        if (!$request->activo) {
+            $data['activo'] = '0';
         }
 
-        $rancho->save();
+        // Auto-slug único: si 'rancho-de-prueba' ya existe genera 'rancho-de-prueba-2', etc.
+        $slugBase = Str::slug($request->nombre);
+        $slug     = $slugBase;
+        $i        = 2;
+        while (Rancho::withTrashed()->where('slug', $slug)->exists()) {
+            $slug = $slugBase . '-' . $i++;
+        }
+        $data['slug'] = $slug;
 
-        // Crear certificación asociada si se proporcionó
-        if ($request->filled('tipo_certificacion_id')) {
+        $rancho->create($data);
+
+        // Crear certificación si se proporcionó tipo
+        if ($request->tipo_certificacion_id) {
             $this->guardarCertificacion($rancho, $request);
         }
 
-        // Invalidar cache del mosaico público
         CertificacionController::invalidarCache();
 
-        return redirect()
-            ->route('admin.ranchos')
-            ->with('success', 'Rancho agregado correctamente.');
+        return ['titulo' => 'Agregar Rancho', 'msg' => 'El rancho ha sido agregado.', 'class' => 'success'];
     }
 
-    // ── Editar ───────────────────────────────────────────────────────────────
-
-    public function editarForm(string $hash_id)
+    /*----------  Editar Form  ----------*/
+    public function editarForm($hash_id)
     {
-        $id     = Hashids::decode($hash_id)[0] ?? abort(404);
-        $rancho = Rancho::with(['certificaciones.tipoCertificacion'])->findOrFail($id);
-        $tiposCertificacion = TipoCertificacion::activos()->get();
+        $rancho             = Rancho::with(['certificacion.tipoCertificacion'])
+                                    ->findOrFail(Hashids::decode($hash_id)[0]);
+        $tiposCertificacion = TipoCertificacion::where('activo', true)
+                                               ->orderBy('orden', 'ASC')
+                                               ->get();
 
-        return view('admin.ranchos.form', compact('rancho', 'tiposCertificacion'));
+        return view('admin.modules.ranchos.editar', compact('rancho', 'tiposCertificacion'));
     }
 
-    public function editar(Request $request, string $hash_id)
+    /*----------  Editar  ----------*/
+    public function editar($hash_id, Request $request)
     {
-        $id     = Hashids::decode($hash_id)[0] ?? abort(404);
-        $rancho = Rancho::findOrFail($id);
+        $rancho = Rancho::findOrFail(Hashids::decode($hash_id)[0]);
+        $data   = $request->all();
 
-        $request->validate([
-            'nombre'    => 'required|string|max:150',
-            'ubicacion' => 'required|string|max:200',
-            'municipio' => 'nullable|string|max:100',
-            'estado'    => 'nullable|string|max:100',
-            'orden'     => 'nullable|integer|min:0',
-            'imagen'    => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
-        ]);
+        $data['imagen'] = str_replace(',', '', $request->imagen);
 
-        $rancho->fill($request->only(['nombre', 'ubicacion', 'municipio', 'estado', 'orden']));
-        $rancho->activo = $request->boolean('activo', true);
-
-        if ($request->hasFile('imagen')) {
-            // Eliminar imagen anterior del disco antes de subir la nueva
-            if ($rancho->imagen) {
-                Storage::disk('public')->delete($rancho->imagen);
-            }
-            $rancho->imagen = $request->file('imagen')->store('ranchos', 'public');
+        if (!$request->activo) {
+            $data['activo'] = '0';
         }
 
-        $rancho->save();
+        $rancho->update($data);
+
+        // Actualizar/crear certificación si se proporcionó tipo
+        if ($request->tipo_certificacion_id) {
+            $this->guardarCertificacion($rancho, $request);
+        }
 
         CertificacionController::invalidarCache();
 
-        return redirect()
-            ->route('admin.ranchos')
-            ->with('success', 'Rancho actualizado correctamente.');
+        return ['titulo' => 'Editar Rancho', 'msg' => 'El rancho ha sido editado.', 'class' => 'success'];
     }
 
-    // ── Eliminar (SoftDelete) ─────────────────────────────────────────────────
-
-    public function eliminar(string $hash_id)
+    /*----------  Eliminar  ----------*/
+    public function eliminar($hash_id)
     {
-        $id     = Hashids::decode($hash_id)[0] ?? abort(404);
-        $rancho = Rancho::findOrFail($id);
-        $rancho->delete(); // SoftDelete — no elimina físicamente
+        $rancho = Rancho::findOrFail(Hashids::decode($hash_id)[0]);
+        $rancho->delete(); // SoftDelete
 
         CertificacionController::invalidarCache();
 
-        return redirect()
-            ->route('admin.ranchos')
-            ->with('success', 'Rancho eliminado correctamente.');
+        return ['titulo' => 'Eliminar Rancho', 'msg' => 'El rancho ha sido eliminado.', 'class' => 'success'];
     }
 
-    // ── Subida de imagen (AJAX) ───────────────────────────────────────────────
-
-    /**
-     * Subir imagen de un rancho vía AJAX desde el formulario admin.
-     * Responde con la URL pública para previsualización inmediata.
-     */
+    /*----------  Subir Imagen  ----------*/
     public function subirImagen(Request $request)
     {
-        $request->validate([
-            'imagen' => 'required|image|mimes:jpg,jpeg,png,webp|max:5120',
-        ]);
+        $disk   = Storage::disk('uploads');
+        $folder = 'ranchos/imagenes/';
 
-        $path = $request->file('imagen')->store('ranchos', 'public');
+        // Compatible con agregar (imagenInput via x-file-input)
+        // y editar (imagenFileInput via bootstrap-fileinput)
+        $file     = $request->file('imagenInput') ?? $request->file('imagenFileInput');
+        $filename = $folder . time() . '-' . $file->getClientOriginalName();
+
+        if (!file_exists(public_path('uploads') . '/' . $folder)) {
+            mkdir(public_path('uploads') . '/' . $folder, 0777, true);
+        }
+
+        $disk->put($filename, File::get($file));
+
+        return response()->json(['imagen' => $filename]);
+    }
+
+    /*----------  Eliminar Imagen  ----------*/
+    public function eliminarImagen(Request $request)
+    {
+        $disk   = Storage::disk('uploads');
+        $rancho = Rancho::findOrFail(Hashids::decode($request->rancho_id)[0]);
+        $imagen = $rancho->imagen;
+
+        $rancho->imagen = '';
+        $rancho->save();
+        $disk->delete($imagen);
+
+        return ['titulo' => 'Eliminar imagen', 'msg' => 'La imagen ha sido eliminada.', 'class' => 'success'];
+    }
+
+    /*----------  Subir PDF (disco privado)  ----------*/
+    public function subirPdf(Request $request)
+    {
+        // El input en la vista se llama 'pdfFileInput' (nombre del <input type="file">)
+        $file     = $request->file('pdfFileInput');
+        $folder   = 'certificados/';
+        $filename = $folder . time() . '-' . $file->getClientOriginalName();
+
+        // Crear directorio si no existe
+        if (!file_exists(storage_path('app/private/' . $folder))) {
+            mkdir(storage_path('app/private/' . $folder), 0777, true);
+        }
+
+        Storage::disk('private')->put($filename, File::get($file));
 
         return response()->json([
-            'path' => $path,
-            'url'  => asset('storage/' . $path),
+            'pdf'                 => $filename,
+            'pdf_nombre_original' => $file->getClientOriginalName(),
         ]);
     }
 
-    // ── Subida/Edición de certificación ──────────────────────────────────────
+    /*----------  Eliminar PDF  ----------*/
+    public function eliminarPdf(Request $request)
+    {
+        $cert = Certificacion::findOrFail(Hashids::decode($request->cert_id)[0]);
 
-    /**
-     * Crea o actualiza la certificación de un rancho para un tipo dado.
-     * updateOrCreate garantiza que no se dupliquen filas para el mismo
-     * rancho + tipo. Guarda el PDF en disco privado si se proporciona.
-     *
-     * @param  Rancho   $rancho
-     * @param  Request  $request
-     */
+        Storage::disk('private')->delete($cert->pdf_path);
+        $cert->pdf_path            = null;
+        $cert->pdf_nombre_original = null;
+        $cert->save();
+
+        CertificacionController::invalidarCache();
+
+        return ['titulo' => 'Eliminar PDF', 'msg' => 'El PDF ha sido eliminado.', 'class' => 'success'];
+    }
+
+    /*----------  Guardar Certificación  ----------*/
     private function guardarCertificacion(Rancho $rancho, Request $request): void
     {
         $cert = Certificacion::updateOrCreate(
@@ -186,22 +200,20 @@ class RanchoController extends Controller
                 'fecha_emision'      => $request->fecha_emision,
                 'fecha_vencimiento'  => $request->fecha_vencimiento,
                 'organismo_auditor'  => $request->organismo_auditor,
-                'estado'             => $request->estado ?? 'vigente',
-                'visible_publico'    => $request->boolean('visible_publico', true),
+                'estado'             => $request->estado_cert ?? 'vigente',
+                'visible_publico'    => $request->visible_publico ? true : false,
                 'notas'              => $request->notas,
             ]
         );
 
-        // PDF: se guarda en disco PRIVADO — nunca accesible por URL directa
-        if ($request->hasFile('pdf')) {
-            // Eliminar PDF anterior si existe
+        // El PDF llega como campo hidden (subido por subirPdf())
+        if ($request->filled('pdf_path')) {
+            // Borrar PDF anterior
             if ($cert->pdf_path) {
                 Storage::disk('private')->delete($cert->pdf_path);
             }
-
-            $archivo = $request->file('pdf');
-            $cert->pdf_nombre_original = $archivo->getClientOriginalName();
-            $cert->pdf_path = $archivo->store('certificados', 'private');
+            $cert->pdf_path            = $request->pdf_path;
+            $cert->pdf_nombre_original = $request->pdf_nombre_original;
             $cert->save();
         }
     }

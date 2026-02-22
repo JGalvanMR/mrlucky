@@ -74,7 +74,7 @@
 
         @foreach($ranchos as $rancho)
             @php
-                $cert    = $rancho->cert;
+                $cert = $rancho->certificacion->first();
                 $vigente = $cert?->es_vigente ?? false;
                 $proximo = $cert?->proximo_a_vencer ?? false;
             @endphp

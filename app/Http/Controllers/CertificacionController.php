@@ -10,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Cache;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CertificacionController extends Controller
 {
@@ -62,18 +63,18 @@ class CertificacionController extends Controller
                 ->with([
                     // Eager loading optimizado: solo la certificación más reciente
                     // de este tipo para cada rancho. Evita N+1 queries.
-                    'certificaciones' => function ($query) use ($tipoCertificacion) {
+                    'certificacion' => function ($query) use ($tipoCertificacion) {
                         $query->where('tipo_certificacion_id', $tipoCertificacion->id)
                               ->where('visible_publico', true)
-                              ->orderByDesc('fecha_vencimiento')
-                              ->limit(1);
+                              ->orderByDesc('fecha_vencimiento');
+                            //   ->limit(1);
                     },
                 ])
                 ->get()
-                ->map(function (Rancho $rancho) {
-                    // Adjuntar la certificación relevante directamente al objeto Rancho
+                ->map(function (rancho $rancho) {
+                    // adjuntar la certificación relevante directamente al objeto rancho
                     // para acceso limpio en la vista: $rancho->cert
-                    $rancho->cert = $rancho->certificaciones->first();
+                    $rancho->cert = $rancho->certificacion->first();
                     return $rancho;
                 });
         });
@@ -105,7 +106,7 @@ class CertificacionController extends Controller
      *
      * @param  Certificacion  $certificacion  Inyectado por Route Model Binding
      */
-    public function descargar(Certificacion $certificacion): Response
+    public function descargar(Certificacion $certificacion): StreamedResponse
     {
         abort_unless(
             $certificacion->visible_publico,

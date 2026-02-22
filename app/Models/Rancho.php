@@ -46,7 +46,7 @@ class Rancho extends Model
     /**
      * Todas las certificaciones de este rancho (historial completo).
      */
-    public function certificaciones(): HasMany
+    public function certificacion(): HasMany
     {
         return $this->hasMany(Certificacion::class);
     }
@@ -72,7 +72,7 @@ class Rancho extends Model
      */
     public function scopeConCertificacionTipo($query, int $tipoCertificacionId)
     {
-        return $query->whereHas('certificaciones', function ($q) use ($tipoCertificacionId) {
+        return $query->whereHas('certificacion', function ($q) use ($tipoCertificacionId) {
             $q->where('tipo_certificacion_id', $tipoCertificacionId)
               ->where('visible_publico', true);
         });
@@ -86,8 +86,8 @@ class Rancho extends Model
      */
     public function getImagenUrlAttribute(): string
     {
-        if ($this->imagen && Storage::disk('public')->exists($this->imagen)) {
-            return asset('storage/' . $this->imagen);
+        if ($this->imagen && Storage::disk('uploads')->exists($this->imagen)) {
+            return asset('uploads/' . $this->imagen);
         }
 
         // Usa imagen existente del sitio como placeholder

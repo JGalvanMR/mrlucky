@@ -10,6 +10,7 @@ class Certificacion extends Model
 {
     use SoftDeletes;
 
+    protected $table = 'certificacion';
     protected $fillable = [
         'rancho_id',
         'tipo_certificacion_id',
