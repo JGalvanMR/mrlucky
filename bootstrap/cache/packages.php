@@ -1,13 +1,13 @@
 <?php return array (
   'chinleung/laravel-locales' => 
   array (
-    'aliases' => 
-    array (
-      'LaravelLocales' => 'ChinLeung\\LaravelLocales\\LaravelLocalesFacade',
-    ),
     'providers' => 
     array (
       0 => 'ChinLeung\\LaravelLocales\\LaravelLocalesServiceProvider',
+    ),
+    'aliases' => 
+    array (
+      'LaravelLocales' => 'ChinLeung\\LaravelLocales\\LaravelLocalesFacade',
     ),
   ),
   'chinleung/laravel-multilingual-routes' => 
@@ -15,17 +15,6 @@
     'providers' => 
     array (
       0 => 'ChinLeung\\MultilingualRoutes\\MultilingualRoutesServiceProvider',
-    ),
-  ),
-  'facade/ignition' => 
-  array (
-    'aliases' => 
-    array (
-      'Flare' => 'Facade\\Ignition\\Facades\\Flare',
-    ),
-    'providers' => 
-    array (
-      0 => 'Facade\\Ignition\\IgnitionServiceProvider',
     ),
   ),
   'fruitcake/laravel-cors' => 
@@ -37,31 +26,24 @@
   ),
   'geo-sot/laravel-env-editor' => 
   array (
-    'aliases' => 
-    array (
-      'EnvEditor' => 'GeoSot\\EnvEditor\\Facades\\EnvEditor',
-    ),
     'providers' => 
     array (
       0 => 'GeoSot\\EnvEditor\\ServiceProvider',
     ),
+    'aliases' => 
+    array (
+      'EnvEditor' => 'GeoSot\\EnvEditor\\Facades\\EnvEditor',
+    ),
   ),
   'intervention/image' => 
   array (
-    'aliases' => 
-    array (
-      'Image' => 'Intervention\\Image\\Facades\\Image',
-    ),
     'providers' => 
     array (
       0 => 'Intervention\\Image\\ImageServiceProvider',
     ),
-  ),
-  'laravel/sail' => 
-  array (
-    'providers' => 
+    'aliases' => 
     array (
-      0 => 'Laravel\\Sail\\SailServiceProvider',
+      'Image' => 'Intervention\\Image\\Facades\\Image',
     ),
   ),
   'laravel/sanctum' => 
@@ -80,24 +62,24 @@
   ),
   'livewire/livewire' => 
   array (
-    'aliases' => 
-    array (
-      'Livewire' => 'Livewire\\Livewire',
-    ),
     'providers' => 
     array (
       0 => 'Livewire\\LivewireServiceProvider',
     ),
+    'aliases' => 
+    array (
+      'Livewire' => 'Livewire\\Livewire',
+    ),
   ),
   'maatwebsite/excel' => 
   array (
-    'aliases' => 
-    array (
-      'Excel' => 'Maatwebsite\\Excel\\Facades\\Excel',
-    ),
     'providers' => 
     array (
       0 => 'Maatwebsite\\Excel\\ExcelServiceProvider',
+    ),
+    'aliases' => 
+    array (
+      'Excel' => 'Maatwebsite\\Excel\\Facades\\Excel',
     ),
   ),
   'nesbot/carbon' => 
@@ -105,13 +87,6 @@
     'providers' => 
     array (
       0 => 'Carbon\\Laravel\\ServiceProvider',
-    ),
-  ),
-  'nunomaduro/collision' => 
-  array (
-    'providers' => 
-    array (
-      0 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
     ),
   ),
   'rappasoft/laravel-livewire-tables' => 
@@ -144,13 +119,13 @@
   ),
   'vinkla/hashids' => 
   array (
-    'aliases' => 
-    array (
-      'Hashids' => 'Vinkla\\Hashids\\Facades\\Hashids',
-    ),
     'providers' => 
     array (
       0 => 'Vinkla\\Hashids\\HashidsServiceProvider',
+    ),
+    'aliases' => 
+    array (
+      'Hashids' => 'Vinkla\\Hashids\\Facades\\Hashids',
     ),
   ),
 );

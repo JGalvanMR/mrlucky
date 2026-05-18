@@ -1,3 +1,4 @@
+@section('title', 'Inicio')
 @extends('site.layouts.master')
 
 @php

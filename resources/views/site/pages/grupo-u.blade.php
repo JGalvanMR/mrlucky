@@ -1,3 +1,4 @@
+@section('title', 'Grupo U')
 @extends('site.layouts.master')
 @php
     $active = 'grupo-u';

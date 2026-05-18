@@ -124,6 +124,16 @@ Route::post('ingresar', [UserController::class, 'login'])->name('login');
 Route::get('salir', [UserController::class, 'logout'])->name('salir');
 //Route::get('set-locale/{new}', [SiteController::class, 'setLocale'])->name('set_locale');
 
+// ── Boletín Flipbook Viewer ────────────────────────────────────────────
+// Español
+Route::get('/boletin/{slug}', [SiteController::class, 'boletin'])
+    ->name('es.boletin');
+
+// Inglés
+Route::get('/en/newsletter/{slug}', [SiteController::class, 'boletin'])
+    ->name('en.boletin');
+
+
 Route::get('/test-viewer', function () {
 
     $pdfUrl = asset('Boletin-14-Grupo-U.pdf');

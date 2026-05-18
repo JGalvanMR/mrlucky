@@ -6,7 +6,11 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>{{ env('APP_NAME') }} | </title>
+	<title>{{ env('APP_NAME') }} | @yield('title')</title>
+	<link rel="icon" type="image/x-icon" href="/site/img/favicon/favicon.ico">
+	<link rel="icon" type="image/png" sizes="32x32" href="/site/img/favicon/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/site/img/favicon/favicon-16x16.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="/site/img/favicon/apple-icon-114x114.png">
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fakeloader@1.0.0/fakeLoader.css">
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
 	<link rel="stylesheet" href="/site/css/style.css">
@@ -34,6 +38,7 @@
 		.dropdown a{ font-size:14px !important; text-transform: uppercase; }
 	</style>
 	@yield('customCSS')
+
 </head>
 <body>
     
@@ -241,5 +246,54 @@
 	@yield('customJS')
 
 
+
+<!-- Cookie Banner -->
+<div id="cookie-banner" style="position:fixed;bottom:0;left:0;width:100%;background:#222;color:#fff;padding:15px;text-align:center;z-index:9999;display:none;font-size:14px;">
+Este sitio utiliza cookies para mejorar tu experiencia.
+<button id="accept-cookies" style="margin-left:10px;padding:6px 12px;background:#28a745;color:#fff;border:none;border-radius:4px;">Aceptar</button>
+<button id="reject-cookies" style="margin-left:5px;padding:6px 12px;background:#dc3545;color:#fff;border:none;border-radius:4px;">Rechazar</button>
+</div>
+
+<script>
+function loadMatomo() {
+  var _paq = window._paq = window._paq || [];
+  _paq.push(["setDocumentTitle", document.domain + "/" + document.title]);
+  _paq.push(["setCookieDomain", "*.mrlucky.com.mx"]);
+  _paq.push(["setDomains", ["*.mrlucky.com.mx"]]);
+  _paq.push(["setDoNotTrack", true]);
+  _paq.push(["trackPageView"]);
+  _paq.push(["enableLinkTracking"]);
+  (function() {
+    var u="//mrlucky.com.mx/matomo/";
+    _paq.push(["setTrackerUrl", u+"matomo.php"]);
+    _paq.push(["setSiteId", "1"]);
+    var d=document, g=d.createElement("script"), s=d.getElementsByTagName("script")[0];
+    g.async=true; g.src=u+"matomo.js"; s.parentNode.insertBefore(g,s);
+  })();
+}
+
+document.addEventListener("DOMContentLoaded", function(){
+    var consent = localStorage.getItem("cookie_consent");
+
+    if(consent === "accepted"){
+        loadMatomo();
+    }else if(consent === null){
+        document.getElementById("cookie-banner").style.display = "block";
+    }
+
+    document.getElementById("accept-cookies").onclick = function(){
+        localStorage.setItem("cookie_consent","accepted");
+        document.getElementById("cookie-banner").style.display="none";
+        loadMatomo();
+    };
+
+    document.getElementById("reject-cookies").onclick = function(){
+        localStorage.setItem("cookie_consent","rejected");
+        document.getElementById("cookie-banner").style.display="none";
+    };
+});
+</script>
+
+@include("site.partials.cookies-banner")
 </body>
 </html>

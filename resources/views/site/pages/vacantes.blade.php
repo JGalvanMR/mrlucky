@@ -1,3 +1,4 @@
+@section('title', 'Vacantes')
 @extends('site.layouts.master')
 @php
     $active = 'vacantes';

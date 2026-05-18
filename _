@@ -1,0 +1,43 @@
+[0;1;32m●[0m php-fpm.service - The PHP FastCGI Process Manager
+     Loaded: loaded (]8;;file://nuevo.mrlucky.com.mx/usr/lib/systemd/system/php-fpm.service/usr/lib/systemd/system/php-fpm.service]8;;; [0;1;38;5;185mdisabled[0m; preset: [0;1;38;5;185mdisabled[0m)
+     Active: [0;1;32mactive (running)[0m since Mon 2026-02-23 20:53:31 CST; 24min ago
+   Main PID: 2101412 (php-fpm)
+     Status: "Processes active: 0, idle: 22, Requests: 96, slow: 0, Traffic: 0req/sec"
+      Tasks: 23 (limit: 74601)
+     Memory: 77.4M
+        CPU: 40.352s
+     CGroup: /system.slice/php-fpm.service
+             ├─[0;38;5;245m2101412 "php-fpm: master process (/etc/php-fpm.conf)"[0m
+             ├─[0;38;5;245m2101417 "php-fpm: pool nuevo"[0m
+             ├─[0;38;5;245m2101419 "php-fpm: pool pruebas"[0m
+             ├─[0;38;5;245m2101420 "php-fpm: pool pruebas"[0m
+             ├─[0;38;5;245m2101421 "php-fpm: pool pruebas"[0m
+             ├─[0;38;5;245m2101422 "php-fpm: pool pruebas"[0m
+             ├─[0;38;5;245m2101423 "php-fpm: pool pruebas"[0m
+             ├─[0;38;5;245m2101424 "php-fpm: pool viejo"[0m
+             ├─[0;38;5;245m2101425 "php-fpm: pool viejo"[0m
+             ├─[0;38;5;245m2101426 "php-fpm: pool viejo"[0m
+             ├─[0;38;5;245m2101427 "php-fpm: pool viejo"[0m
+             ├─[0;38;5;245m2101428 "php-fpm: pool viejo"[0m
+             ├─[0;38;5;245m2101429 "php-fpm: pool www"[0m
+             ├─[0;38;5;245m2101430 "php-fpm: pool www"[0m
+             ├─[0;38;5;245m2101431 "php-fpm: pool www"[0m
+             ├─[0;38;5;245m2101432 "php-fpm: pool www"[0m
+             ├─[0;38;5;245m2101433 "php-fpm: pool www"[0m
+             ├─[0;38;5;245m2102022 "php-fpm: pool nuevo"[0m
+             ├─[0;38;5;245m2102365 "php-fpm: pool nuevo"[0m
+             ├─[0;38;5;245m2102380 "php-fpm: pool nuevo"[0m
+             ├─[0;38;5;245m2102395 "php-fpm: pool nuevo"[0m
+             ├─[0;38;5;245m2102404 "php-fpm: pool nuevo"[0m
+             └─[0;38;5;245m2102415 "php-fpm: pool nuevo"[0m
+
+Feb 23 20:59:44 nuevo.mrlucky.com.mx systemd-coredump[2101900]: ]8;;man:core(5)[🡕]]8;; [0;1;31m[0;1;39m[0;1;31mProcess 2101780 (php-fpm) of user 1000 dumped core.[0m
+Feb 23 21:10:11 nuevo.mrlucky.com.mx systemd-coredump[2102010]: ]8;;man:core(5)[🡕]]8;; [0;1;31m[0;1;39m[0;1;31mProcess 2101793 (php-fpm) of user 1000 dumped core.[0m
+Feb 23 21:10:16 nuevo.mrlucky.com.mx systemd-coredump[2102018]: ]8;;man:core(5)[🡕]]8;; [0;1;31m[0;1;39m[0;1;31mProcess 2101896 (php-fpm) of user 1000 dumped core.[0m
+Feb 23 21:16:23 nuevo.mrlucky.com.mx systemd-coredump[2102295]: ]8;;man:core(5)[🡕]]8;; [0;1;31m[0;1;39m[0;1;31mProcess 2101844 (php-fpm) of user 1000 dumped core.[0m
+Feb 23 21:16:25 nuevo.mrlucky.com.mx systemd-coredump[2102369]: ]8;;man:core(5)[🡕]]8;; [0;1;31m[0;1;39m[0;1;31mProcess 2101803 (php-fpm) of user 1000 dumped core.[0m
+Feb 23 21:16:26 nuevo.mrlucky.com.mx systemd-coredump[2102376]: ]8;;man:core(5)[🡕]]8;; [0;1;31m[0;1;39m[0;1;31mProcess 2101852 (php-fpm) of user 1000 dumped core.[0m
+Feb 23 21:16:26 nuevo.mrlucky.com.mx systemd-coredump[2102384]: ]8;;man:core(5)[🡕]]8;; [0;1;31m[0;1;39m[0;1;31mProcess 2101904 (php-fpm) of user 1000 dumped core.[0m
+Feb 23 21:16:39 nuevo.mrlucky.com.mx systemd-coredump[2102391]: ]8;;man:core(5)[🡕]]8;; [0;1;31m[0;1;39m[0;1;31mProcess 2102388 (php-fpm) of user 1000 dumped core.[0m
+Feb 23 21:16:57 nuevo.mrlucky.com.mx systemd-coredump[2102400]: ]8;;man:core(5)[🡕]]8;; [0;1;31m[0;1;39m[0;1;31mProcess 2102014 (php-fpm) of user 1000 dumped core.[0m
+Feb 23 21:17:18 nuevo.mrlucky.com.mx systemd-coredump[2102411]: ]8;;man:core(5)[🡕]]8;; [0;1;31m[0;1;39m[0;1;31mProcess 2102373 (php-fpm) of user 1000 dumped core.[0m
