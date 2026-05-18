@@ -124,6 +124,13 @@ Route::post('ingresar', [UserController::class, 'login'])->name('login');
 Route::get('salir', [UserController::class, 'logout'])->name('salir');
 //Route::get('set-locale/{new}', [SiteController::class, 'setLocale'])->name('set_locale');
 
+Route::get('/test-viewer', function () {
+
+    $pdfUrl = asset('Boletin-14-Grupo-U.pdf');
+
+    return view('pdf.viewer', compact('pdfUrl'));
+});
+
 Route::group(['prefix' => 'admin', 'middleware' => 'auth'], function () {
     //Route::group(['prefix' => 'admin'], function(){
 
