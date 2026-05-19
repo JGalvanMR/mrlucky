@@ -278,10 +278,40 @@ class SiteController extends Controller
      * numero : número editorial del boletín
      */
         $boletines = [
+            'catalogo' => [
+                'titulo'  => 'Catalogo Mr. Lucky',
+                'pdf'     => 'docs/catalogo-mrlucky.pdf',
+                'numero'  => '10',
+                'ano'     => '2026',
+            ],
+            'sustentabilidad' => [
+                'titulo'  => 'Sustentabilidad',
+                'pdf'     => 'docs/Sustentabilidad_2024.pdf',
+                'numero'  => '11',
+                'ano'     => '2024',
+            ],
+            'boletin-12' => [
+                'titulo'  => 'Boletín Informativo No. 12 · Grupo U',
+                'pdf'     => 'docs/Boletin-12-Grupo-U.pdf',
+                'numero'  => '12',
+                'ano'     => '2024',
+            ],
+            'boletin-13' => [
+                'titulo'  => 'Boletín Informativo No. 13 · Grupo U',
+                'pdf'     => 'docs/Boletin-13-Grupo-U.pdf',
+                'numero'  => '13',
+                'ano'     => '2025',
+            ],
             'boletin-14' => [
                 'titulo'  => 'Boletín Informativo No. 14 · Grupo U',
                 'pdf'     => 'docs/Boletin-14-Grupo-U.pdf',
                 'numero'  => '14',
+                'ano'     => '2026',
+            ],
+            'recetario' => [
+                'titulo'  => 'RECETARIO CALABAZAS MR. LUCKY',
+                'pdf'     => 'docs/RECETARIO CALABAZAS MR. LUCKY.pdf',
+                'numero'  => '15',
                 'ano'     => '2025',
             ],
             // Para agregar un boletín futuro, solo añadir aquí:

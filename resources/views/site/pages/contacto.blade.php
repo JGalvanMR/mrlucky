@@ -140,67 +140,200 @@ $active = 'contacto';
         </h3>
 
         {{-- ── Catálogo ──────────────────────────────────── --}}
-        <div class="d-flex align-items-center justify-content-between py-2">
-            <a href="/docs/catalogo-mrlucky.pdf"
-                class="d-flex align-items-center text-decoration-none" target="_blank">
-                <img src="/site/img/icon-descarga.png" class="img-fluid mr-2" width="30" alt="">
-                <span class="azul-marino h5 f600 mb-0 editable"
-                    data-group="contacto" data-key="catalogo">
-                    {!! trans('contacto.catalogo') !!}
-                </span>
-            </a>
+        <div class="boletin-14-entry py-3">
+
+            {{-- Encabezado de la entrada --}}
+            <div class="d-flex align-items-start justify-content-between flex-wrap" style="gap:12px;">
+                <div class="d-flex align-items-center">
+                    <img src="/site/img/icon-descarga.png" class="img-fluid mr-3" width="30" alt="">
+                    <div>
+                        <div class="azul-marino h5 f600 mb-0">
+                            {{ App::currentLocale() == 'es'
+                                ? 'Catalogo Mr. Lucky · 2026'
+                                : 'Mr. Lucky Catalog · 2026' }}
+                        </div>
+                        <small class="gris">
+                            {{ App::currentLocale() == 'es'
+                                ? 'Catalogo digital interactivo · Navega página por página'
+                                : 'Interactive digital catalog · Browse page by page' }}
+                        </small>
+                    </div>
+                </div>
+
+                {{-- Acciones: Ver como revista + Descargar PDF --}}
+                <div class="d-flex align-items-center flex-wrap" style="gap:8px;">
+
+                    {{-- Botón principal: abrir flipbook en modal --}}
+                    <button type="button"
+                        class="btn-boletin-flipbook"
+                        data-toggle="modal"
+                        data-target="#modalBoletinFlibook"
+                        data-src="{{ route( App::currentLocale() . '.boletin', ['slug' => 'catalogo'] ) }}"
+                        aria-label="{{ App::currentLocale() == 'es' ? 'Ver Catalogo Mr. Lucky como revista digital' : 'View Mr. Lucky Catalog as digital magazine' }}">
+                        <i class="fa fa-book mr-1" aria-hidden="true"></i>
+                        {{ App::currentLocale() == 'es' ? 'Ver revista' : 'View magazine' }}
+                    </button>
+
+                    {{-- Botón secundario: descarga directa --}}
+                    <a href="/docs/catalogo-mrlucky.pdf"
+                        download
+                        class="btn-boletin-pdf"
+                        title="{{ App::currentLocale() == 'es' ? 'Descargar PDF' : 'Download PDF' }}">
+                        <i class="fa fa-download mr-1" aria-hidden="true"></i>
+                        PDF
+                    </a>
+                </div>
+            </div>
         </div>
+
         <hr>
 
         {{-- ── Sustentabilidad 2024 ─────────────────────── --}}
-        @if(App::currentLocale() == 'es')
-        <div class="d-flex align-items-center justify-content-between py-2">
-            <a href="/docs/Sustentabilidad_2024.pdf"
-                class="d-flex align-items-center text-decoration-none" target="_blank">
-                <img src="/site/img/icon-descarga.png" class="img-fluid mr-2" width="30" alt="">
-                <span class="azul-marino h5 f600 mb-0 editable"
-                    data-group="contacto" data-key="boletin-10">
-                    {!! trans('contacto.boletin-10') !!}
-                </span>
-            </a>
+        <div class="boletin-14-entry py-3">
+
+            {{-- Encabezado de la entrada --}}
+            <div class="d-flex align-items-start justify-content-between flex-wrap" style="gap:12px;">
+                <div class="d-flex align-items-center">
+                    <img src="/site/img/icon-descarga.png" class="img-fluid mr-3" width="30" alt="">
+                    <div>
+                        <div class="azul-marino h5 f600 mb-0">
+                            {{ App::currentLocale() == 'es'
+                                ? 'Sustentabilidad'
+                                : 'Sustainability' }}
+                        </div>
+                        <small class="gris">
+                            {{ App::currentLocale() == 'es'
+                                ? 'Revista digital interactiva · Navega página por página'
+                                : 'Interactive digital magazine · Browse page by page' }}
+                        </small>
+                    </div>
+                </div>
+
+                {{-- Acciones: Ver como revista + Descargar PDF --}}
+                <div class="d-flex align-items-center flex-wrap" style="gap:8px;">
+
+                    {{-- Botón principal: abrir flipbook en modal --}}
+                    <button type="button"
+                        class="btn-boletin-flipbook"
+                        data-toggle="modal"
+                        data-target="#modalBoletinFlibook"
+                        data-src="{{ route( App::currentLocale() . '.boletin', ['slug' => 'sustentabilidad'] ) }}"
+                        aria-label="{{ App::currentLocale() == 'es' ? 'Ver Sustentabilidad como revista digital' : 'View Sustainability as digital magazine' }}">
+                        <i class="fa fa-book mr-1" aria-hidden="true"></i>
+                        {{ App::currentLocale() == 'es' ? 'Ver revista' : 'View magazine' }}
+                    </button>
+
+                    {{-- Botón secundario: descarga directa --}}
+                    <a href="/docs/Sustentabilidad_2024.pdf"
+                        download
+                        class="btn-boletin-pdf"
+                        title="{{ App::currentLocale() == 'es' ? 'Descargar PDF' : 'Download PDF' }}">
+                        <i class="fa fa-download mr-1" aria-hidden="true"></i>
+                        PDF
+                    </a>
+                </div>
+            </div>
         </div>
-        @else
-        <div class="d-flex align-items-center justify-content-between py-2">
-            <a href="/docs/Sustainability.pdf"
-                class="d-flex align-items-center text-decoration-none" target="_blank">
-                <img src="/site/img/icon-descarga.png" class="img-fluid mr-2" width="30" alt="">
-                <span class="azul-marino h5 f600 mb-0 editable"
-                    data-group="contacto" data-key="boletin-10">
-                    {!! trans('contacto.boletin-10') !!}
-                </span>
-            </a>
-        </div>
-        @endif
+
         <hr>
 
         {{-- ── Boletín 12 ────────────────────────────────── --}}
-        <div class="d-flex align-items-center justify-content-between py-2">
-            <a href="/docs/Boletin-12-Grupo-U.pdf"
-                class="d-flex align-items-center text-decoration-none" target="_blank">
-                <img src="/site/img/icon-descarga.png" class="img-fluid mr-2" width="30" alt="">
-                <span class="azul-marino h5 f600 mb-0 editable"
-                    data-group="contacto" data-key="boletin-11">
-                    {!! trans('contacto.boletin-11') !!}
-                </span>
-            </a>
+        <div class="boletin-14-entry py-3">
+
+            {{-- Encabezado de la entrada --}}
+            <div class="d-flex align-items-start justify-content-between flex-wrap" style="gap:12px;">
+                <div class="d-flex align-items-center">
+                    <img src="/site/img/icon-descarga.png" class="img-fluid mr-3" width="30" alt="">
+                    <div>
+                        <div class="azul-marino h5 f600 mb-0">
+                            {{ App::currentLocale() == 'es'
+                                ? 'Boletín Informativo No. 12 · Grupo U · 2025'
+                                : 'Newsletter No. 12 · Grupo U · 2025' }}
+                        </div>
+                        <small class="gris">
+                            {{ App::currentLocale() == 'es'
+                                ? 'Revista digital interactiva · Navega página por página'
+                                : 'Interactive digital magazine · Browse page by page' }}
+                        </small>
+                    </div>
+                </div>
+
+                {{-- Acciones: Ver como revista + Descargar PDF --}}
+                <div class="d-flex align-items-center flex-wrap" style="gap:8px;">
+
+                    {{-- Botón principal: abrir flipbook en modal --}}
+                    <button type="button"
+                        class="btn-boletin-flipbook"
+                        data-toggle="modal"
+                        data-target="#modalBoletinFlibook"
+                        data-src="{{ route( App::currentLocale() . '.boletin', ['slug' => 'boletin-12'] ) }}"
+                        aria-label="{{ App::currentLocale() == 'es' ? 'Ver Boletín 12 como revista digital' : 'View Newsletter 12 as digital magazine' }}">
+                        <i class="fa fa-book mr-1" aria-hidden="true"></i>
+                        {{ App::currentLocale() == 'es' ? 'Ver revista' : 'View magazine' }}
+                    </button>
+
+                    {{-- Botón secundario: descarga directa --}}
+                    <a href="/docs/Boletin-12-Grupo-U.pdf"
+                        download
+                        class="btn-boletin-pdf"
+                        title="{{ App::currentLocale() == 'es' ? 'Descargar PDF' : 'Download PDF' }}">
+                        <i class="fa fa-download mr-1" aria-hidden="true"></i>
+                        PDF
+                    </a>
+                </div>
+            </div>
         </div>
         <hr>
 
-        {{-- ── Boletín 13 ────────────────────────────────── --}}
-        <div class="d-flex align-items-center justify-content-between py-2">
-            <a href="/docs/Boletin-13-Grupo-U.pdf"
-                class="d-flex align-items-center text-decoration-none" target="_blank">
-                <img src="/site/img/icon-descarga.png" class="img-fluid mr-2" width="30" alt="">
-                <span class="azul-marino h5 f600 mb-0 editable"
-                    data-group="contacto" data-key="boletin-12">
-                    {!! trans('contacto.boletin-12') !!}
-                </span>
-            </a>
+
+        {{-- ═══════════════════════════════════════════════════════
+             BOLETÍN 13 — Entrada con Flipbook
+             Es la única entrada que tiene el botón "Ver como revista"
+        ═══════════════════════════════════════════════════════ --}}
+        <div class="boletin-14-entry py-3">
+
+            {{-- Encabezado de la entrada --}}
+            <div class="d-flex align-items-start justify-content-between flex-wrap" style="gap:12px;">
+                <div class="d-flex align-items-center">
+                    <img src="/site/img/icon-descarga.png" class="img-fluid mr-3" width="30" alt="">
+                    <div>
+                        <div class="azul-marino h5 f600 mb-0">
+                            {{ App::currentLocale() == 'es'
+                                ? 'Boletín Informativo No. 13 · Grupo U · 2025'
+                                : 'Newsletter No. 13 · Grupo U · 2025' }}
+                        </div>
+                        <small class="gris">
+                            {{ App::currentLocale() == 'es'
+                                ? 'Revista digital interactiva · Navega página por página'
+                                : 'Interactive digital magazine · Browse page by page' }}
+                        </small>
+                    </div>
+                </div>
+
+                {{-- Acciones: Ver como revista + Descargar PDF --}}
+                <div class="d-flex align-items-center flex-wrap" style="gap:8px;">
+
+                    {{-- Botón principal: abrir flipbook en modal --}}
+                    <button type="button"
+                        class="btn-boletin-flipbook"
+                        data-toggle="modal"
+                        data-target="#modalBoletinFlibook"
+                        data-src="{{ route( App::currentLocale() . '.boletin', ['slug' => 'boletin-13'] ) }}"
+                        aria-label="{{ App::currentLocale() == 'es' ? 'Ver Boletín 13 como revista digital' : 'View Newsletter 13 as digital magazine' }}">
+                        <i class="fa fa-book mr-1" aria-hidden="true"></i>
+                        {{ App::currentLocale() == 'es' ? 'Ver revista' : 'View magazine' }}
+                    </button>
+
+                    {{-- Botón secundario: descarga directa --}}
+                    <a href="/docs/Boletin-13-Grupo-U.pdf"
+                        download
+                        class="btn-boletin-pdf"
+                        title="{{ App::currentLocale() == 'es' ? 'Descargar PDF' : 'Download PDF' }}">
+                        <i class="fa fa-download mr-1" aria-hidden="true"></i>
+                        PDF
+                    </a>
+                </div>
+            </div>
         </div>
         <hr>
 
@@ -217,8 +350,8 @@ $active = 'contacto';
                     <div>
                         <div class="azul-marino h5 f600 mb-0">
                             {{ App::currentLocale() == 'es'
-                                ? 'Boletín Informativo No. 14 · Grupo U · 2025'
-                                : 'Newsletter No. 14 · Grupo U · 2025' }}
+                                ? 'Boletín Informativo No. 14 · Grupo U · 2026'
+                                : 'Newsletter No. 14 · Grupo U · 2026' }}
                         </div>
                         <small class="gris">
                             {{ App::currentLocale() == 'es'
@@ -256,16 +389,52 @@ $active = 'contacto';
         <hr>
 
         {{-- ── Recetario Halloween ───────────────────────── --}}
-        <div class="d-flex align-items-center justify-content-between py-2">
-            <a href="/docs/RECETARIO CALABAZAS MR. LUCKY.pdf"
-                class="d-flex align-items-center text-decoration-none" target="_blank">
-                <img src="/site/img/icon-descarga.png" class="img-fluid mr-2" width="30" alt="">
-                <span class="azul-marino h5 f600 mb-0 editable"
-                    data-group="contacto" data-key="boletin-12">
-                    {!! trans('contacto.Recetario-Haloween') !!}
-                </span>
-            </a>
+        <div class="boletin-14-entry py-3">
+
+            {{-- Encabezado de la entrada --}}
+            <div class="d-flex align-items-start justify-content-between flex-wrap" style="gap:12px;">
+                <div class="d-flex align-items-center">
+                    <img src="/site/img/icon-descarga.png" class="img-fluid mr-3" width="30" alt="">
+                    <div>
+                        <div class="azul-marino h5 f600 mb-0">
+                            {{ App::currentLocale() == 'es'
+                                ? 'RECETARIO CALABAZAS MR. LUCKY'
+                                : "MR. LUCKY'S PUMPKIN RECIPE BOOK" }}
+                        </div>
+                        <small class="gris">
+                            {{ App::currentLocale() == 'es'
+                                ? 'Recetario digital interactivo · Navega página por página'
+                                : 'Interactive Digital Cookbook · Browse page by page' }}
+                        </small>
+                    </div>
+                </div>
+
+                {{-- Acciones: Ver como revista + Descargar PDF --}}
+                <div class="d-flex align-items-center flex-wrap" style="gap:8px;">
+
+                    {{-- Botón principal: abrir flipbook en modal --}}
+                    <button type="button"
+                        class="btn-boletin-flipbook"
+                        data-toggle="modal"
+                        data-target="#modalBoletinFlibook"
+                        data-src="{{ route( App::currentLocale() . '.boletin', ['slug' => 'recetario'] ) }}"
+                        aria-label="{{ App::currentLocale() == 'es' ? 'Ver RECETARIO CALABAZAS MR. LUCKY como recetario digital' : "View MR. LUCKY'S PUMPKIN RECIPE BOOK as Digital Cookbook" }}">
+                        <i class="fa fa-book mr-1" aria-hidden="true"></i>
+                        {{ App::currentLocale() == 'es' ? 'Ver recetario' : 'View cookbook' }}
+                    </button>
+
+                    {{-- Botón secundario: descarga directa --}}
+                    <a href="/docs/RECETARIO CALABAZAS MR. LUCKY.pdf"
+                        download
+                        class="btn-boletin-pdf"
+                        title="{{ App::currentLocale() == 'es' ? 'Descargar PDF' : 'Download PDF' }}">
+                        <i class="fa fa-download mr-1" aria-hidden="true"></i>
+                        PDF
+                    </a>
+                </div>
+            </div>
         </div>
+        <hr>
 
     </div>{{-- /.container --}}
 </section>
