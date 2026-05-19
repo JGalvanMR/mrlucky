@@ -132,6 +132,7 @@ $active = 'contacto';
     </div>
 </section>
 
+
 <section class="py-5">
     <div class="container">
         <h3 class="text-center azul-marino pacifico mb-4 editable"
@@ -170,8 +171,8 @@ $active = 'contacto';
                         data-target="#modalBoletinFlibook"
                         data-src="{{ route( App::currentLocale() . '.boletin', ['slug' => 'catalogo'] ) }}"
                         aria-label="{{ App::currentLocale() == 'es' ? 'Ver Catalogo Mr. Lucky como revista digital' : 'View Mr. Lucky Catalog as digital magazine' }}">
-                        <i class="fa fa-book mr-1" aria-hidden="true"></i>
-                        {{ App::currentLocale() == 'es' ? 'Ver revista' : 'View magazine' }}
+                        <i class="fa fa-book mr-1 text-white" aria-hidden="true"></i>
+                        {{ App::currentLocale() == 'es' ? 'Ver catalogo' : 'View catalog' }}
                     </button>
 
                     {{-- Botón secundario: descarga directa --}}
@@ -203,8 +204,8 @@ $active = 'contacto';
                         </div>
                         <small class="gris">
                             {{ App::currentLocale() == 'es'
-                                ? 'Revista digital interactiva · Navega página por página'
-                                : 'Interactive digital magazine · Browse page by page' }}
+                                ? 'Reporte digital interactivo · Navega página por página'
+                                : 'Interactive digital report · Browse page by page' }}
                         </small>
                     </div>
                 </div>
@@ -218,9 +219,9 @@ $active = 'contacto';
                         data-toggle="modal"
                         data-target="#modalBoletinFlibook"
                         data-src="{{ route( App::currentLocale() . '.boletin', ['slug' => 'sustentabilidad'] ) }}"
-                        aria-label="{{ App::currentLocale() == 'es' ? 'Ver Sustentabilidad como revista digital' : 'View Sustainability as digital magazine' }}">
-                        <i class="fa fa-book mr-1" aria-hidden="true"></i>
-                        {{ App::currentLocale() == 'es' ? 'Ver revista' : 'View magazine' }}
+                        aria-label="{{ App::currentLocale() == 'es' ? 'Ver Sustentabilidad como reporte digital' : 'View Sustainability as digital report' }}">
+                        <i class="fa fa-book mr-1 text-white" aria-hidden="true"></i>
+                        {{ App::currentLocale() == 'es' ? 'Ver reporte' : 'View report' }}
                     </button>
 
                     {{-- Botón secundario: descarga directa --}}
@@ -247,8 +248,8 @@ $active = 'contacto';
                     <div>
                         <div class="azul-marino h5 f600 mb-0">
                             {{ App::currentLocale() == 'es'
-                                ? 'Boletín Informativo No. 12 · Grupo U · 2025'
-                                : 'Newsletter No. 12 · Grupo U · 2025' }}
+                                ? 'Boletín Informativo No. 12 · Grupo U · 2024'
+                                : 'Newsletter No. 12 · Grupo U · 2024' }}
                         </div>
                         <small class="gris">
                             {{ App::currentLocale() == 'es'
@@ -268,8 +269,8 @@ $active = 'contacto';
                         data-target="#modalBoletinFlibook"
                         data-src="{{ route( App::currentLocale() . '.boletin', ['slug' => 'boletin-12'] ) }}"
                         aria-label="{{ App::currentLocale() == 'es' ? 'Ver Boletín 12 como revista digital' : 'View Newsletter 12 as digital magazine' }}">
-                        <i class="fa fa-book mr-1" aria-hidden="true"></i>
-                        {{ App::currentLocale() == 'es' ? 'Ver revista' : 'View magazine' }}
+                        <i class="fa fa-book mr-1 text-white" aria-hidden="true"></i>
+                        {{ App::currentLocale() == 'es' ? 'Ver boletin' : 'View magazine' }}
                     </button>
 
                     {{-- Botón secundario: descarga directa --}}
@@ -320,8 +321,8 @@ $active = 'contacto';
                         data-target="#modalBoletinFlibook"
                         data-src="{{ route( App::currentLocale() . '.boletin', ['slug' => 'boletin-13'] ) }}"
                         aria-label="{{ App::currentLocale() == 'es' ? 'Ver Boletín 13 como revista digital' : 'View Newsletter 13 as digital magazine' }}">
-                        <i class="fa fa-book mr-1" aria-hidden="true"></i>
-                        {{ App::currentLocale() == 'es' ? 'Ver revista' : 'View magazine' }}
+                        <i class="fa fa-book mr-1 text-white" aria-hidden="true"></i>
+                        {{ App::currentLocale() == 'es' ? 'Ver boletin' : 'View magazine' }}
                     </button>
 
                     {{-- Botón secundario: descarga directa --}}
@@ -371,8 +372,8 @@ $active = 'contacto';
                         data-target="#modalBoletinFlibook"
                         data-src="{{ route( App::currentLocale() . '.boletin', ['slug' => 'boletin-14'] ) }}"
                         aria-label="{{ App::currentLocale() == 'es' ? 'Ver Boletín 14 como revista digital' : 'View Newsletter 14 as digital magazine' }}">
-                        <i class="fa fa-book mr-1" aria-hidden="true"></i>
-                        {{ App::currentLocale() == 'es' ? 'Ver revista' : 'View magazine' }}
+                        <i class="fa fa-book mr-1 text-white" aria-hidden="true"></i>
+                        {{ App::currentLocale() == 'es' ? 'Ver boletín' : 'View newsletter' }}
                     </button>
 
                     {{-- Botón secundario: descarga directa --}}
@@ -419,7 +420,7 @@ $active = 'contacto';
                         data-target="#modalBoletinFlibook"
                         data-src="{{ route( App::currentLocale() . '.boletin', ['slug' => 'recetario'] ) }}"
                         aria-label="{{ App::currentLocale() == 'es' ? 'Ver RECETARIO CALABAZAS MR. LUCKY como recetario digital' : "View MR. LUCKY'S PUMPKIN RECIPE BOOK as Digital Cookbook" }}">
-                        <i class="fa fa-book mr-1" aria-hidden="true"></i>
+                        <i class="fa fa-book mr-1 text-white" aria-hidden="true"></i>
                         {{ App::currentLocale() == 'es' ? 'Ver recetario' : 'View cookbook' }}
                     </button>
 
@@ -582,6 +583,208 @@ $active = 'contacto';
     @section('customCSS')
     @parent
     <style>
+        /* ══ SECCIÓN DESCARGABLES ══════════════════════════ */
+.section-descargables { background: #fff; }
+
+/* Grid adaptativo: 1 col mobile → 2 col tablet → 3 col desktop */
+.descargables-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+@media (min-width: 576px) {
+    .descargables-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 992px) {
+    .descargables-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* ── Tarjeta base ── */
+.desc-card {
+    position: relative;
+    background: #fff;
+    border: 1px solid #e8edf5;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    box-shadow: 0 2px 12px rgba(0,60,166,0.06);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.desc-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 28px rgba(0,60,166,0.13);
+}
+
+/* Boletines tienen borde izquierdo azul */
+.desc-card--boletin {
+    border-left: 4px solid #003ca6;
+}
+
+/* Boletín destacado (último/más nuevo) */
+.desc-card--nuevo {
+    border-color: #56b276;
+    border-left-color: #56b276;
+    background: linear-gradient(135deg, #f0f7f2 0%, #ffffff 100%);
+}
+
+/* Badge "¡Nuevo!" */
+.desc-card-nuevo-badge {
+    position: absolute;
+    top: -1px;
+    right: 16px;
+    background: #56b276;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 0 0 8px 8px;
+}
+
+/* ── Ícono ── */
+.desc-card-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.desc-card-icon .fa {
+    font-size: 20px;
+    color: #fff;
+}
+
+/* ── Cuerpo de la tarjeta ── */
+.desc-card-body { flex: 1; }
+
+.desc-card-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-bottom: 6px;
+}
+.desc-badge-catalogo { background: #e3f0ff; color: #003ca6; }
+.desc-badge-reporte  { background: #e8f5e9; color: #2e7d32; }
+.desc-badge-boletin  { background: #e3f0ff; color: #003ca6; }
+.desc-badge-receta   { background: #fff8e1; color: #e65100; }
+
+.desc-card-title {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.4;
+    margin: 0 0 2px;
+    color: #003ca6;
+}
+.desc-card-sub {
+    font-size: 11px;
+    color: #7c8ba0;
+    margin: 0;
+}
+
+/* ── Acciones ── */
+.desc-card-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* Botón base */
+.desc-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 14px;
+    border-radius: 50px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-decoration: none !important;
+    border: 2px solid transparent;
+    white-space: nowrap;
+    font-family: 'Roboto', sans-serif;
+}
+
+/* Ver revista (principal) */
+.desc-btn-flipbook {
+    background: #003ca6;
+    color: #fff !important;
+    border-color: #003ca6;
+    box-shadow: 0 3px 10px rgba(0,60,166,0.25);
+}
+.desc-btn-flipbook:hover {
+    background: #002d80;
+    border-color: #002d80;
+    transform: translateY(-1px);
+    box-shadow: 0 5px 16px rgba(0,60,166,0.35);
+    color: #fff !important;
+}
+
+/* Descargar PDF (secundario) */
+.desc-btn-pdf {
+    background: #fff;
+    color: #56b276 !important;
+    border-color: #56b276;
+}
+.desc-btn-pdf:hover {
+    background: #56b276;
+    color: #fff !important;
+    transform: translateY(-1px);
+}
+
+/* Solo descargar (sin flipbook) */
+.desc-btn-download {
+    background: #f5f5f5;
+    color: #003ca6 !important;
+    border-color: #e1e1e1;
+}
+.desc-btn-download:hover {
+    background: #003ca6;
+    color: #fff !important;
+    border-color: #003ca6;
+}
+
+/* ── Modal flipbook ── */
+.modal-flipbook-content {
+    border: none;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #0c0805;
+    position: relative;
+}
+
+.modal-flipbook-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 200;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(0,0,0,0.6);
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: background 0.2s;
+    backdrop-filter: blur(4px);
+}
+.modal-flipbook-close:hover {
+    background: rgba(219,6,50,0.85);
+    border-color: rgba(219,6,50,0.5);
+}
         /* ── Entrada Boletín 14 ─────────────────────────── */
         .boletin-14-entry {
             background: linear-gradient(135deg, #f0f7f0 0%, #e8f0fd 100%);
@@ -663,6 +866,7 @@ $active = 'contacto';
     </script>
     <script>
         $(function() {
+
 
             /* ── Flipbook Modal — Boletín 14 ──────────────────
                Carga el iframe SOLO al abrir el modal (lazy).

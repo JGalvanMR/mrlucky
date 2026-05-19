@@ -266,7 +266,7 @@ class SiteController extends Controller
 
 
     /*----------  Boletín Flipbook  ----------*/
-    public function boletin($slug)
+    public function boletins($slug)
     {
         $idioma = $this->getLang();
 
@@ -335,7 +335,69 @@ class SiteController extends Controller
         return view('pdf.viewer', compact('idioma', 'boletin', 'pdfUrl'));
     }
 
+    /*----------  Boletín Flipbook  ----------*/
+    public function boletin($slug)
+    {
+        $idioma = $this->getLang();
 
+        /*
+     * Catálogo de publicaciones disponibles como flipbook.
+     * Para añadir un nuevo boletín: agregar una entrada aquí
+     * y subir el PDF a public/docs/.
+     */
+        $boletines = [
+            'catalogo' => [
+                'titulo'  => 'Catalogo Mr. Lucky',
+                'pdf'     => 'docs/catalogo-mrlucky.pdf',
+                'numero'  => '-',
+                'ano'     => '2026',
+            ],
+            'sustentabilidad' => [
+                'titulo'  => 'Sustentabilidad',
+                'pdf'     => 'docs/Sustentabilidad_2024.pdf',
+                'numero'  => '-',
+                'ano'     => '2024',
+            ],
+            'boletin-12' => [
+                'titulo'  => 'Boletín Informativo No. 12 · Grupo U',
+                'pdf'     => 'docs/Boletin-12-Grupo-U.pdf',
+                'numero'  => '12',
+                'ano'     => '2024',
+            ],
+            'boletin-13' => [
+                'titulo'  => 'Boletín Informativo No. 13 · Grupo U',
+                'pdf'     => 'docs/Boletin-13-Grupo-U.pdf',
+                'numero'  => '13',
+                'ano'     => '2025',
+            ],
+            'boletin-14' => [
+                'titulo'  => 'Boletín Informativo No. 14 · Grupo U',
+                'pdf'     => 'docs/Boletin-14-Grupo-U.pdf',
+                'numero'  => '14',
+                'ano'     => '2026',
+            ],
+            'recetario' => [
+                'titulo'  => 'Recetario Mr. Lucky · Calabazas',
+                'pdf'     => 'docs/RECETARIO CALABAZAS MR. LUCKY.pdf',
+                'numero'  => '—',
+                'ano'     => '2024',
+            ],
+        ];
+
+        abort_unless(array_key_exists($slug, $boletines), 404);
+
+        $boletin = $boletines[$slug];
+
+        abort_unless(
+            file_exists(public_path($boletin['pdf'])),
+            404,
+            'El archivo del boletín no está disponible temporalmente.'
+        );
+
+        $pdfUrl = asset($boletin['pdf']);
+
+        return view('pdf.viewer', compact('idioma', 'boletin', 'pdfUrl'));
+    }
 
     /*----------  Enviar Contacto  ----------*/
     public function enviarContacto(Request $request)
