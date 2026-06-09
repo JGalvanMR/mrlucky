@@ -133,12 +133,24 @@ Route::get('/boletin/{slug}', [SiteController::class, 'boletin'])
 Route::get('/en/newsletter/{slug}', [SiteController::class, 'boletin'])
     ->name('en.boletin');
 
+Route::get('/recetario-botanas', function () {
 
-Route::get('/test-viewer', function () {
-
-    $pdfUrl = asset('Boletin-14-Grupo-U.pdf');
+    $pdfUrl = asset('Siempre_en_el_Juego_Bontanas.pdf');
 
     return view('pdf.viewer', compact('pdfUrl'));
+});
+
+Route::get('/recetario_botanas', function () {
+    $pdfUrl = asset('Siempre_en_el_Juego_Bontanas.pdf');
+
+    // Creamos el array con la información de las botanas para que el .blade lo lea perfectamente
+    $boletin = [
+        'titulo' => 'Recetario de Botanas · Siempre en el Juego',
+        'ano'    => '', // O el año que prefieras, ej: '2026'
+        'numero' => ''        // El número de edición que gustes
+    ];
+
+    return view('pdf.viewer', compact('pdfUrl', 'boletin'));
 });
 
 Route::group(['prefix' => 'admin', 'middleware' => 'auth'], function () {

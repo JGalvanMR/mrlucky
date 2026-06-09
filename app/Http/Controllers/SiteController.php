@@ -346,6 +346,12 @@ class SiteController extends Controller
      * y subir el PDF a public/docs/.
      */
         $boletines = [
+            'heb' => [
+                'titulo'  => 'Passport To Produce H-E-B 2026 EXPO',
+                'pdf'     => 'docs/heb.pdf',
+                'numero'  => '-',
+                'ano'     => '2026',
+            ],
             'catalogo' => [
                 'titulo'  => 'Catalogo Mr. Lucky',
                 'pdf'     => 'docs/catalogo-mrlucky.pdf',
@@ -356,12 +362,6 @@ class SiteController extends Controller
                 'titulo'  => 'Sustentabilidad',
                 'pdf'     => 'docs/Sustentabilidad_2024.pdf',
                 'numero'  => '-',
-                'ano'     => '2024',
-            ],
-            'boletin-12' => [
-                'titulo'  => 'Boletín Informativo No. 12 · Grupo U',
-                'pdf'     => 'docs/Boletin-12-Grupo-U.pdf',
-                'numero'  => '12',
                 'ano'     => '2024',
             ],
             'boletin-13' => [

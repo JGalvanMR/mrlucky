@@ -140,6 +140,54 @@ $active = 'contacto';
             {!! trans('contacto.descargas') !!}
         </h3>
 
+        {{-- ── HEB ────────────────────────────────── --}}
+        <div class="boletin-14-entry py-3">
+
+            {{-- Encabezado de la entrada --}}
+            <div class="d-flex align-items-start justify-content-between flex-wrap" style="gap:12px;">
+                <div class="d-flex align-items-center">
+                    <img src="/site/img/icon-descarga.png" class="img-fluid mr-3" width="30" alt="">
+                    <div>
+                        <div class="azul-marino h5 f600 mb-0">
+                            {{ App::currentLocale() == 'es'
+                                ? 'PASAPORTE PARA LA EXPO · H-E-B · 2026'
+                                : 'PASSPORT TO PRODUCE · H-E-B · 2026' }}
+                        </div>
+                        <small class="gris">
+                            {{ App::currentLocale() == 'es'
+                                ? 'Catalogo de Productos digital interactivo · Navega página por página'
+                                : 'Interactive Digital Product Catalog · Browse page by page' }}
+                        </small>
+                    </div>
+                </div>
+
+                {{-- Acciones: Ver como revista + Descargar PDF --}}
+                <div class="d-flex align-items-center flex-wrap" style="gap:8px;">
+
+                    {{-- Botón principal: abrir flipbook en modal --}}
+                    <button type="button"
+                        class="btn-boletin-flipbook"
+                        data-toggle="modal"
+                        data-target="#modalBoletinFlibook"
+                        data-src="{{ route( App::currentLocale() . '.boletin', ['slug' => 'heb'] ) }}"
+                        aria-label="{{ App::currentLocale() == 'es' ? 'Ver como revista digital' : 'View as digital magazine' }}">
+                        <i class="fa fa-book mr-1 text-white" aria-hidden="true"></i>
+                        {{ App::currentLocale() == 'es' ? 'Ver catalogo' : 'View Catalog' }}
+                    </button>
+
+                    {{-- Botón secundario: descarga directa --}}
+                    <a href="/docs/Boletin-12-Grupo-U.pdf"
+                        download
+                        class="btn-boletin-pdf"
+                        title="{{ App::currentLocale() == 'es' ? 'Descargar PDF' : 'Download PDF' }}">
+                        <i class="fa fa-download mr-1" aria-hidden="true"></i>
+                        PDF
+                    </a>
+                </div>
+            </div>
+        </div>
+        <hr>
+
         {{-- ── Catálogo ──────────────────────────────────── --}}
         <div class="boletin-14-entry py-3">
 
@@ -237,55 +285,6 @@ $active = 'contacto';
         </div>
 
         <hr>
-
-        {{-- ── Boletín 12 ────────────────────────────────── --}}
-        <div class="boletin-14-entry py-3">
-
-            {{-- Encabezado de la entrada --}}
-            <div class="d-flex align-items-start justify-content-between flex-wrap" style="gap:12px;">
-                <div class="d-flex align-items-center">
-                    <img src="/site/img/icon-descarga.png" class="img-fluid mr-3" width="30" alt="">
-                    <div>
-                        <div class="azul-marino h5 f600 mb-0">
-                            {{ App::currentLocale() == 'es'
-                                ? 'Boletín Informativo No. 12 · Grupo U · 2024'
-                                : 'Newsletter No. 12 · Grupo U · 2024' }}
-                        </div>
-                        <small class="gris">
-                            {{ App::currentLocale() == 'es'
-                                ? 'Revista digital interactiva · Navega página por página'
-                                : 'Interactive digital magazine · Browse page by page' }}
-                        </small>
-                    </div>
-                </div>
-
-                {{-- Acciones: Ver como revista + Descargar PDF --}}
-                <div class="d-flex align-items-center flex-wrap" style="gap:8px;">
-
-                    {{-- Botón principal: abrir flipbook en modal --}}
-                    <button type="button"
-                        class="btn-boletin-flipbook"
-                        data-toggle="modal"
-                        data-target="#modalBoletinFlibook"
-                        data-src="{{ route( App::currentLocale() . '.boletin', ['slug' => 'boletin-12'] ) }}"
-                        aria-label="{{ App::currentLocale() == 'es' ? 'Ver Boletín 12 como revista digital' : 'View Newsletter 12 as digital magazine' }}">
-                        <i class="fa fa-book mr-1 text-white" aria-hidden="true"></i>
-                        {{ App::currentLocale() == 'es' ? 'Ver boletin' : 'View magazine' }}
-                    </button>
-
-                    {{-- Botón secundario: descarga directa --}}
-                    <a href="/docs/Boletin-12-Grupo-U.pdf"
-                        download
-                        class="btn-boletin-pdf"
-                        title="{{ App::currentLocale() == 'es' ? 'Descargar PDF' : 'Download PDF' }}">
-                        <i class="fa fa-download mr-1" aria-hidden="true"></i>
-                        PDF
-                    </a>
-                </div>
-            </div>
-        </div>
-        <hr>
-
 
         {{-- ═══════════════════════════════════════════════════════
              BOLETÍN 13 — Entrada con Flipbook
