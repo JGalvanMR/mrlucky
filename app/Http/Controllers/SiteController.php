@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\App;
+
 use App\Models\Idioma;
 use App\Models\Post;
 use App\Models\Receta;
@@ -14,220 +17,296 @@ use App\Models\CategoriaReceta;
 use App\Models\Producto;
 use App\Models\Ingrediente;
 use App\Models\Slide;
-use App;
-use Mail;
+use App\Models\Rancho;
+use App\Models\TipoCertificacion;
+use Illuminate\Support\Facades\Cache;
 
 class SiteController extends Controller
 {
-    /*----------  Obteniendo el idioma  ----------*/
+    /*---------- Obteniendo el idioma ----------*/
     public function getLang()
     {
-        //$idioma = Idioma::select('id')->where('clave', App::currentLocale())->first()['id'];
-        $idioma = Idioma::select('*')->where('clave', App::currentLocale())->first();
+        $idioma = Idioma::where('clave', App::currentLocale())->firstOrFail();
         session()->put('idioma', $idioma);
+
         return $idioma;
     }
 
-    /*----------  Home  ----------*/
+    /*---------- Home ----------*/
     public function index()
     {
         $idioma = $this->getLang();
-        $recetas = Receta::where('activo', '1')->where('idioma_id', $idioma->id)->orderBy('orden', 'ASC')->take(6)->get();
-        $blogs = Post::where('activo', '1')->where('idioma_id', $idioma->id)->orderBy('orden', 'ASC')->take(3)->get();
-        $slides = Slide::where('activo', '1')->where('idioma_id', $idioma->id)->orderBy('orden', 'ASC')->get();
 
-        $requested_url = $_SERVER['REQUEST_URI'];
-        $redirect_url = 'http://gab.mrlucky.com.mx/ventasnew';
+        $recetas = Receta::where('activo', '1')
+            ->where('idioma_id', $idioma->id)
+            ->orderBy('orden', 'ASC')
+            ->take(6)
+            ->get();
 
-        // Redirigir solo si la URL solicitada coincide con '/ventasnew'
-        if ($requested_url == 'http://www.mrlucky.com.mx/ventasnew') {
-            header('Location: ' . $redirect_url);
-            exit(); // Asegurarse de que el script se detenga después de la redirección
-        }
+        $blogs = Post::where('activo', '1')
+            ->where('idioma_id', $idioma->id)
+            ->orderBy('orden', 'ASC')
+            ->take(3)
+            ->get();
+
+        $slides = Slide::where('activo', '1')
+            ->where('idioma_id', $idioma->id)
+            ->orderBy('orden', 'ASC')
+            ->get();
+
         return view('site.pages.inicio', compact('idioma', 'recetas', 'blogs', 'slides'));
     }
 
-    /*----------  Nosotros  ----------*/
+    /*---------- Nosotros ----------*/
     public function nosotros()
     {
         $idioma = $this->getLang();
         return view('site.pages.nosotros', compact('idioma'));
     }
 
-    /*----------  GAB  ----------*//*----------  GAB  ----------*//*----------  GAB  ----------*//*----------  GAB  ----------*/
+    /*---------- GAB ----------*/
     public function ventasnew()
     {
-        $idioma = $this->getLang();
-        $redirect_url = 'http://gab.mrlucky.com.mx/ventasnew';
-        return Redirect($redirect_url);
+        $this->getLang();
+        return redirect()->away('http://gab.mrlucky.com.mx/ventasnew');
     }
+
     public function ventas()
     {
-        $idioma = $this->getLang();
-        $redirect_url = 'http://gab.mrlucky.com.mx/ventas';
-        return Redirect($redirect_url);
+        $this->getLang();
+        return redirect()->away('http://gab.mrlucky.com.mx/ventas');
     }
+
     public function fletes()
     {
-        $idioma = $this->getLang();
-        $redirect_url = 'http://gab.mrlucky.com.mx/fletes';
-        return Redirect($redirect_url);
+        $this->getLang();
+        return redirect()->away('http://gab.mrlucky.com.mx/fletes');
     }
+
     public function trazabilidad()
     {
         $idioma = $this->getLang();
-        $redirect_url = '';
 
-        // Verificar el idioma y establecer la URL de redirección apropiada
-        if ($idioma == 'en') {
-            $redirect_url = 'http://gab.mrlucky.com.mx/english/trazabilidad/index.html';
-        } else {
-            $redirect_url = 'http://gab.mrlucky.com.mx/trazabilidad';
-        }
+        $redirect_url = $idioma->clave === 'en'
+            ? 'http://gab.mrlucky.com.mx/english/trazabilidad/index.html'
+            : 'http://gab.mrlucky.com.mx/trazabilidad';
 
-        // Redirigir al usuario a la URL determinada
-        // return redirect()->away($redirect_url);
-        return Redirect::to($redirect_url);
+        return redirect()->away($redirect_url);
     }
+
     public function tr(Request $request)
     {
-        $idioma = $this->getLang();
+        $this->getLang();
+
         $id_codigo = $request->query('id_codigo');
         $redirect_url = 'http://gab.mrlucky.com.mx/tr/trazabilidad2_dmi.php?id_codigo=' . $id_codigo;
-        return Redirect::to($redirect_url);
+
+        return redirect()->away($redirect_url);
     }
+
     public function trazabilidadLote(Request $request)
     {
-        $idioma = $this->getLang();
+        $this->getLang();
+
         $cve_odp = $request->query('cve_odp');
         $redirect_url = 'http://gab.mrlucky.com.mx/trazabilidad/traza_prod_esp.php?cve_odp=' . $cve_odp;
-        return Redirect::to($redirect_url);
+
+        return redirect()->away($redirect_url);
     }
+
     public function trazabilidadPTI(Request $request)
     {
         $idioma = $this->getLang();
         $id_codigo = $request->query('id_codigo');
-        $redirect_url = '';
 
-        // Verificar el idioma y establecer la URL de redirección apropiada
-        if ($idioma == 'en') {
-            $redirect_url = 'http://gab.mrlucky.com.mx/trazabilidad/traza_esp_pti.php?id_codigo=' . $id_codigo;
-        } else {
+        $redirect_url = $idioma->clave === 'en'
+            ? 'http://gab.mrlucky.com.mx/english/trazabilidad/traza_ing_pti.php?id_codigo=' . $id_codigo
+            : 'http://gab.mrlucky.com.mx/trazabilidad/traza_esp_pti.php?id_codigo=' . $id_codigo;
 
-            $redirect_url = 'http://gab.mrlucky.com.mx/english/trazabilidad/traza_ing_pti.php?id_codigo=' . $id_codigo;
-        }
-
-        // $redirect_url = 'http://gab.mrlucky.com.mx/trazabilidad/traza_esp_pti.php?id_codigo=' . $id_codigo;
-        return Redirect::to($redirect_url);
+        return redirect()->away($redirect_url);
     }
+
     public function trazabilidadPT(Request $request)
     {
-        $idioma = $this->getLang();
+        $this->getLang();
+
         $cve_odp = $request->query('cve_odp');
         $redirect_url = 'http://gab.mrlucky.com.mx/trazabilidad/traza_pt_esp.php?cve_odp=' . $cve_odp;
-        return Redirect::to($redirect_url);
+
+        return redirect()->away($redirect_url);
     }
+
     public function embarques()
     {
-        $idioma = $this->getLang();
-        $redirect_url = 'http://gab.mrlucky.com.mx/ventas/indexemb.php';
-        return Redirect($redirect_url);
+        $this->getLang();
+        return redirect()->away('http://gab.mrlucky.com.mx/ventas/indexemb.php');
     }
+
     public function sisgabweb()
     {
-        //www1166
-        //taQ17Zm
-        $redirect_url = 'ftp://www1166:taQ17Zm@gab.mrlucky.com.mx/sisgabweb';
-        return Redirect($redirect_url);
+        return redirect()->away('ftp://www1166:taQ17Zm@gab.mrlucky.com.mx/sisgabweb');
     }
+
     public function monitorVentas(Request $request)
     {
-        $idioma = $this->getLang();
-        $varx = $request->query('varx');
+        $this->getLang();
 
-        $redirect_url = 'http://gab.mrlucky.com.mx/ventas/monitor_pc.php?varx=1366' . $varx;
-        return Redirect($redirect_url);
+        $varx = $request->query('varx', '');
+        $redirect_url = 'http://gab.mrlucky.com.mx/ventas/monitor_pc.php?varx=' . $varx;
+
+        return redirect()->away($redirect_url);
     }
-    /*----------  GAB  ----------*//*----------  GAB  ----------*//*----------  GAB  ----------*//*----------  GAB  ----------*/
 
-    /*----------  Compromiso  ----------*/
+    /*---------- Compromiso ----------*/
     public function compromiso()
     {
         $idioma = $this->getLang();
         return view('site.pages.compromiso', compact('idioma'));
     }
 
-    /*----------  Productos  ----------*/
+    /*-----------------Certificaciones-----------------*/
+    public function certificaciones()
+{
+    $tipoSlug = 'primusgfs';
+
+    $tipoCertificacion = Cache::remember("tipo_cert.{$tipoSlug}", 3600, function () use ($tipoSlug) {
+        return TipoCertificacion::where('slug', $tipoSlug)
+            ->where('activo', true)
+            ->firstOrFail();
+    });
+
+    $cacheKey = "mosaico.{$tipoSlug}.publico";
+    $ranchos = Cache::remember($cacheKey, 1800, function () use ($tipoCertificacion) {
+        return Rancho::activos()
+            ->with([
+                'certificacion' => function ($query) use ($tipoCertificacion) {
+                    $query->where('tipo_certificacion_id', $tipoCertificacion->id)
+                        ->where('visible_publico', true)
+                        ->orderByDesc('fecha_vencimiento');
+                }
+            ])
+            ->whereHas('certificacion', function ($q) use ($tipoCertificacion) {
+                $q->where('tipo_certificacion_id', $tipoCertificacion->id)
+                  ->where('visible_publico', true);
+            })
+            ->get()
+            ->map(function ($rancho) {
+                $rancho->cert = $rancho->certificacion->first();
+                return $rancho;
+            });
+    });
+
+    return view('site.pages.certificaciones', compact('ranchos', 'tipoCertificacion'));
+}
+
+    /*---------- Productos ----------*/
     public function productos()
     {
         $idioma = $this->getLang();
-        $categorias = CategoriaProducto::where('activo', '1')->where('idioma_id', $idioma->id)->orderBy('orden', 'ASC')->get();
+
+        $categorias = CategoriaProducto::where('activo', '1')
+            ->where('idioma_id', $idioma->id)
+            ->orderBy('orden', 'ASC')
+            ->get();
+
         return view('site.pages.productos', compact('idioma', 'categorias'));
     }
 
-    /*----------  Producto  ----------*/
-    public function producto($slug)
+    /*---------- Producto ----------*/
+    public function producto($slug = null)
     {
         $idioma = $this->getLang();
-        $producto = Producto::where('activo', '1')->where('slug', $slug)->first();
+
+        $producto = Producto::where('activo', '1')
+            ->where('slug', $slug)
+            ->firstOrFail();
+
         return view('site.pages.producto', compact('idioma', 'producto'));
     }
 
-    /*----------  Grupo U  ----------*/
+    /*---------- Grupo U ----------*/
     public function grupoU()
     {
         $idioma = $this->getLang();
         return view('site.pages.grupo-u', compact('idioma'));
     }
 
-    /*----------  Contacto  ----------*/
+    /*---------- Contacto ----------*/
     public function contacto()
     {
         $idioma = $this->getLang();
-        $blogs = Post::where('activo', '1')->where('idioma_id', $idioma->id)->orderBy('orden', 'ASC')->take(3)->get();
-        $preguntas = Pregunta::where('activo', '1')->where('idioma_id', $idioma->id)->orderBy('orden', 'ASC')->get();
-        $vacantes = Vacante::where('activo', '1')->where('idioma_id', $idioma->id)->orderBy('orden', 'ASC')->get();
+
+        $blogs = Post::where('activo', '1')
+            ->where('idioma_id', $idioma->id)
+            ->orderBy('orden', 'ASC')
+            ->take(3)
+            ->get();
+
+        $preguntas = Pregunta::where('activo', '1')
+            ->where('idioma_id', $idioma->id)
+            ->orderBy('orden', 'ASC')
+            ->get();
+
+        $vacantes = Vacante::where('activo', '1')
+            ->where('idioma_id', $idioma->id)
+            ->orderBy('orden', 'ASC')
+            ->get();
 
         return view('site.pages.contacto', compact('idioma', 'blogs', 'preguntas', 'vacantes'));
     }
 
-    /*----------  Blog  ----------*/
+    /*---------- Blog ----------*/
     public function blog()
     {
         $idioma = $this->getLang();
-        $destacado = Post::where('activo', '1')->where('destacado', '1')->where('idioma_id', $idioma->id)->first();
-        $blogs = Post::where('activo', '1')->where('destacado', '0')->where('idioma_id', $idioma->id)->orderBy('orden', 'ASC')->paginate(6);
+
+        $destacado = Post::where('activo', '1')
+            ->where('destacado', '1')
+            ->where('idioma_id', $idioma->id)
+            ->first();
+
+        $blogs = Post::where('activo', '1')
+            ->where('destacado', '0')
+            ->where('idioma_id', $idioma->id)
+            ->orderBy('orden', 'ASC')
+            ->paginate(6);
 
         return view('site.pages.blog', compact('idioma', 'blogs', 'destacado'));
     }
 
-    /*----------  Post  ----------*/
+    /*---------- Post ----------*/
     public function post($slug)
     {
         $idioma = $this->getLang();
-        $post = Post::where('activo', '1')->where('slug', $slug)->first();
+
+        $post = Post::where('activo', '1')
+            ->where('slug', $slug)
+            ->firstOrFail();
 
         return view('site.pages.post', compact('idioma', 'post'));
     }
 
-    /*----------  Recetas  ----------*/
+    /*---------- Recetas ----------*/
     public function recetas()
     {
         $idioma = $this->getLang();
+
         $categorias = CategoriaReceta::where('idioma_id', $idioma->id)->get();
         $ingredientes = Ingrediente::where('idioma_id', $idioma->id)->get();
 
-        $recetas = Receta::where('activo', '1')->where('idioma_id', $idioma->id);
+        $recetas = Receta::where('activo', '1')
+            ->where('idioma_id', $idioma->id);
 
-        if (request('categoria') && request('categoria') != '')
-            $recetas = $recetas->where('categoria_id', request('categoria'));
+        if (request('categoria')) {
+            $recetas->where('categoria_id', request('categoria'));
+        }
 
-        if (request('tiempo') && request('tiempo') != '')
-            $recetas = $recetas->where('tiempo', '<=', request('tiempo'));
+        if (request('tiempo')) {
+            $recetas->where('tiempo', '<=', request('tiempo'));
+        }
 
-        if (request('ingredientes') && request('ingredientes') != '') {
-            //dd(request()->all());
-            $recetas = $recetas->whereHas('ingredientes', function ($query) {
+        if (request('ingredientes')) {
+            $recetas->whereHas('ingredientes', function ($query) {
                 $query->where('ingrediente_id', request('ingredientes'));
             });
         }
@@ -237,192 +316,171 @@ class SiteController extends Controller
         return view('site.pages.recetas', compact('idioma', 'recetas', 'categorias', 'ingredientes'));
     }
 
-    /*----------  Receta  ----------*/
+    /*---------- Receta ----------*/
     public function receta($slug)
     {
         $idioma = $this->getLang();
-        $receta = Receta::where('activo', '1')->where('slug', $slug)->first();
+
+        $receta = Receta::where('activo', '1')
+            ->where('slug', $slug)
+            ->firstOrFail();
 
         return view('site.pages.receta', compact('idioma', 'receta'));
     }
 
-    /*----------  Vacantes  ----------*/
+    /*---------- Vacantes ----------*/
     public function vacantes()
     {
         $idioma = $this->getLang();
-        $vacantes = Vacante::where('activo', '1')->where('idioma_id', $idioma->id)->orderBy('orden', 'ASC')->get();
+
+        $vacantes = Vacante::where('activo', '1')
+            ->where('idioma_id', $idioma->id)
+            ->orderBy('orden', 'ASC')
+            ->get();
 
         return view('site.pages.vacantes', compact('idioma', 'vacantes'));
     }
 
-    /*----------  Vacante  ----------*/
+    /*---------- Vacante ----------*/
     public function vacante($slug)
     {
         $idioma = $this->getLang();
-        $vacante = Vacante::where('activo', '1')->where('slug', $slug)->first();
+
+        $vacante = Vacante::where('activo', '1')
+            ->where('slug', $slug)
+            ->firstOrFail();
 
         return view('site.pages.vacante', compact('idioma', 'vacante'));
     }
 
-
-    /*----------  Boletín Flipbook  ----------*/
-    public function boletins($slug)
-    {
-        $idioma = $this->getLang();
-
-        /*
-     * Catálogo de boletines disponibles como flipbook.
-     * Clave  : slug de URL  (ej: 'boletin-14')
-     * pdf    : ruta relativa al public_path — el archivo debe existir ahí
-     * titulo : mostrado en el <title> y en el encabezado del visor
-     * numero : número editorial del boletín
-     */
-        $boletines = [
-            'catalogo' => [
-                'titulo'  => 'Catalogo Mr. Lucky',
-                'pdf'     => 'docs/catalogo-mrlucky.pdf',
-                'numero'  => '10',
-                'ano'     => '2026',
-            ],
-            'sustentabilidad' => [
-                'titulo'  => 'Sustentabilidad',
-                'pdf'     => 'docs/Sustentabilidad_2024.pdf',
-                'numero'  => '11',
-                'ano'     => '2024',
-            ],
-            'boletin-12' => [
-                'titulo'  => 'Boletín Informativo No. 12 · Grupo U',
-                'pdf'     => 'docs/Boletin-12-Grupo-U.pdf',
-                'numero'  => '12',
-                'ano'     => '2024',
-            ],
-            'boletin-13' => [
-                'titulo'  => 'Boletín Informativo No. 13 · Grupo U',
-                'pdf'     => 'docs/Boletin-13-Grupo-U.pdf',
-                'numero'  => '13',
-                'ano'     => '2025',
-            ],
-            'boletin-14' => [
-                'titulo'  => 'Boletín Informativo No. 14 · Grupo U',
-                'pdf'     => 'docs/Boletin-14-Grupo-U.pdf',
-                'numero'  => '14',
-                'ano'     => '2026',
-            ],
-            'recetario' => [
-                'titulo'  => 'RECETARIO CALABAZAS MR. LUCKY',
-                'pdf'     => 'docs/RECETARIO CALABAZAS MR. LUCKY.pdf',
-                'numero'  => '15',
-                'ano'     => '2025',
-            ],
-            // Para agregar un boletín futuro, solo añadir aquí:
-            // 'boletin-15' => [
-            //     'titulo' => 'Boletín Informativo No. 15 · Grupo U',
-            //     'pdf'    => 'docs/Boletin-15-Grupo-U.pdf',
-            //     'numero' => '15',
-            //     'ano'    => '2026',
-            // ],
-        ];
-
-        // 404 limpio si el slug no existe en el catálogo
-        abort_unless(array_key_exists($slug, $boletines), 404);
-
-        // 404 si el archivo PDF físico no existe
-        $boletin = $boletines[$slug];
-        abort_unless(file_exists(public_path($boletin['pdf'])), 404, 'El archivo del boletín no está disponible.');
-
-        $pdfUrl = asset($boletin['pdf']);
-
-        return view('pdf.viewer', compact('idioma', 'boletin', 'pdfUrl'));
-    }
-
-    /*----------  Boletín Flipbook  ----------*/
+    /*---------- Boletín Flipbook ----------*/
     public function boletin($slug)
     {
-        $idioma = $this->getLang();
+        $idioma = $this->getLang()->clave;
 
-        /*
-     * Catálogo de publicaciones disponibles como flipbook.
-     * Para añadir un nuevo boletín: agregar una entrada aquí
-     * y subir el PDF a public/docs/.
-     */
         $boletines = [
             'heb' => [
-                'titulo'  => 'Passport To Produce H-E-B 2026 EXPO',
-                'pdf'     => 'docs/heb.pdf',
-                'numero'  => '-',
-                'ano'     => '2026',
+                'titulo' => [
+                    'es' => 'Passport To Produce H-E-B 2026 EXPO',
+                    'en' => 'Passport To Produce H-E-B 2026 EXPO'
+                ],
+                'pdf' => [
+                    'es' => 'docs/heb.pdf',
+                    'en' => 'docs/heb.pdf'
+                ],
+                'numero' => '-',
+                'ano' => '2026',
             ],
             'catalogo' => [
-                'titulo'  => 'Catalogo Mr. Lucky',
-                'pdf'     => 'docs/catalogo-mrlucky.pdf',
-                'numero'  => '-',
-                'ano'     => '2026',
+                'titulo' => [
+                    'es' => 'Catalogo Mr. Lucky',
+                    'en' => 'Mr. Lucky Catalog'
+                ],
+                'pdf' => [
+                    'es' => 'docs/catalogo-mrlucky.pdf',
+                    'en' => 'docs/catalogo-mrlucky-en.pdf'
+                ],
+                'numero' => '-',
+                'ano' => '2026',
             ],
             'sustentabilidad' => [
-                'titulo'  => 'Sustentabilidad',
-                'pdf'     => 'docs/Sustentabilidad_2024.pdf',
-                'numero'  => '-',
-                'ano'     => '2024',
+                'titulo' => [
+                    'es' => 'Sustentabilidad',
+                    'en' => 'Sustainability'
+                ],
+                'pdf' => [
+                    'es' => 'docs/Sustainability_2025.pdf',
+                    'en' => 'docs/Sustainability_2025.pdf'
+                ],
+                'numero' => '-',
+                'ano' => '2025',
             ],
             'boletin-13' => [
-                'titulo'  => 'Boletín Informativo No. 13 · Grupo U',
-                'pdf'     => 'docs/Boletin-13-Grupo-U.pdf',
-                'numero'  => '13',
-                'ano'     => '2025',
+                'titulo' => [
+                    'es' => 'Boletín Informativo No. 13 · Grupo U',
+                    'en' => 'Newsletter No. 13 · Grupo U'
+                ],
+                'pdf' => [
+                    'es' => 'docs/Boletin-13-Grupo-U.pdf',
+                    'en' => 'docs/Newsletter-13-Grupo-U.pdf'
+                ],
+                'numero' => '13',
+                'ano' => '2025',
             ],
             'boletin-14' => [
-                'titulo'  => 'Boletín Informativo No. 14 · Grupo U',
-                'pdf'     => 'docs/Boletin-14-Grupo-U.pdf',
-                'numero'  => '14',
-                'ano'     => '2026',
+                'titulo' => [
+                    'es' => 'Boletín Informativo No. 14 · Grupo U',
+                    'en' => 'Newsletter No. 14 · Grupo U'
+                ],
+                'pdf' => [
+                    'es' => 'docs/Boletin-14-Grupo-U.pdf',
+                    'en' => 'docs/Newsletter-14-Grupo-U.pdf'
+                ],
+                'numero' => '14',
+                'ano' => '2026',
+            ],
+            'boletin-15' => [
+                'titulo' => [
+                    'es' => 'Boletín Informativo No. 15 · Grupo U',
+                    'en' => 'Newsletter No. 15 · Grupo U'
+                ],
+                'pdf' => [
+                    'es' => 'docs/Boletin-15-Grupo-U.pdf',
+                    'en' => 'docs/Newsletter-15-Grupo-U.pdf'
+                ],
+                'numero' => '15',
+                'ano' => '2026',
             ],
             'recetario' => [
-                'titulo'  => 'Recetario Mr. Lucky · Calabazas',
-                'pdf'     => 'docs/RECETARIO CALABAZAS MR. LUCKY.pdf',
-                'numero'  => '—',
-                'ano'     => '2024',
+                'titulo' => [
+                    'es' => 'Recetario Mr. Lucky · Calabazas',
+                    'en' => 'Mr. Lucky Recipe Book · Pumpkins'
+                ],
+                'pdf' => [
+                    'es' => 'docs/RECETARIO CALABAZAS MR. LUCKY.pdf',
+                    'en' => 'docs/MR LUCKY PUMPKIN RECIPE BOOK.pdf'
+                ],
+                'numero' => '—',
+                'ano' => '2024',
             ],
         ];
 
         abort_unless(array_key_exists($slug, $boletines), 404);
 
-        $boletin = $boletines[$slug];
+        $datosBoletin = $boletines[$slug];
+        $langActivo = isset($datosBoletin['titulo'][$idioma]) ? $idioma : 'es';
 
-        abort_unless(
-            file_exists(public_path($boletin['pdf'])),
-            404,
-            'El archivo del boletín no está disponible temporalmente.'
-        );
+        $boletin = [
+            'titulo' => $datosBoletin['titulo'][$langActivo],
+            'pdf' => $datosBoletin['pdf'][$langActivo],
+            'numero' => $datosBoletin['numero'],
+            'ano' => $datosBoletin['ano'],
+        ];
+
+        abort_unless(file_exists(public_path($boletin['pdf'])), 404);
 
         $pdfUrl = asset($boletin['pdf']);
 
         return view('pdf.viewer', compact('idioma', 'boletin', 'pdfUrl'));
     }
 
-    /*----------  Enviar Contacto  ----------*/
+    /*---------- Enviar Contacto ----------*/
     public function enviarContacto(Request $request)
     {
-        if (!empty($_POST['website'])) {
-            exit("Bot detectado (honeypot).\n");
+        if (!empty($request->input('website'))) {
+            abort(400, 'Bot detectado (honeypot).');
         }
 
-        # Comprobamos si enviaron el dato
-        if (!isset($_POST["g-recaptcha-response"]) || empty($_POST["g-recaptcha-response"])) {
-            exit("Debes completar el captcha");
+        $token = $request->input('g-recaptcha-response');
+        if (empty($token)) {
+            return redirect()->back()->withErrors(['captcha' => 'Debes completar el captcha']);
         }
 
-        # Antes de comprobar usuario y contraseña, vemos si resolvieron el captcha
-        $token = $_POST["g-recaptcha-response"];
         $verificado = $this->verificarToken($token, '6LezXjArAAAAAFONZGhY728H82z4DzsQ5AEpMHoS');
 
         if ($verificado) {
-            //dd($request->all());
             $data = $request->all();
             $enviarA = explode(',', $data['area']);
-
-            //$enviarA = 'lescobar@brandhouse.com.mx';
-
-            //dd($enviarA);
 
             Mail::send('mails.contacto', $data, function ($m) use ($data, $enviarA) {
                 $m->from($data['email'], 'Web Mr Lucky');
@@ -436,43 +494,31 @@ class SiteController extends Controller
         return redirect(route(App::currentLocale() . '.inicio'));
     }
 
-    function verificarToken($token, $claveSecreta)
+    public function verificarToken($token, $claveSecreta)
     {
-        # La API en donde verificamos el token
         $url = "https://www.google.com/recaptcha/api/siteverify";
-        # Los datos que enviamos a Google
+
         $datos = [
             "secret" => $claveSecreta,
             "response" => $token,
         ];
-        // Crear opciones de la petición HTTP
-        $opciones = array(
-            "http" => array(
+
+        $opciones = [
+            "http" => [
                 "header" => "Content-type: application/x-www-form-urlencoded\r\n",
                 "method" => "POST",
-                "content" => http_build_query($datos), # Agregar el contenido definido antes
-            ),
-        );
-        # Preparar petición
+                "content" => http_build_query($datos),
+            ],
+        ];
+
         $contexto = stream_context_create($opciones);
-        # Hacerla
         $resultado = file_get_contents($url, false, $contexto);
-        # Si hay problemas con la petición (por ejemplo, que no hay internet o algo así)
-        # entonces se regresa false. Este NO es un problema con el captcha, sino con la conexión
-        # al servidor de Google
+
         if ($resultado === false) {
-            # Error haciendo petición
             return false;
         }
 
-        # En caso de que no haya regresado false, decodificamos con JSON
-        # https://parzibyte.me/blog/2018/12/26/codificar-decodificar-json-php/
-
         $resultado = json_decode($resultado);
-        # La variable que nos interesa para saber si el usuario pasó o no la prueba
-        # está en success
-        $pruebaPasada = $resultado->success;
-        # Regresamos ese valor, y listo (sí, ya sé que se podría regresar $resultado->success)
-        return $pruebaPasada;
+        return (bool) ($resultado->success ?? false);
     }
 }

@@ -89,6 +89,11 @@ $active = 'compromiso';
                                     <img src="/site/img/certificaciones/07.jpg" class="img-fluid" loading="lazy" alt="">
                                 </a>
                             </div>
+                            <div class="col-7 col-md">
+                                <a href="" target="_blank">
+                                    <img src="/site/img/certificaciones/08.png" class="img-fluid" loading="lazy" alt="">
+                                </a>
+                            </div>
                         </div>
 
                         {{-- ═══════════════════════════════════════════════════════
@@ -109,8 +114,8 @@ $active = 'compromiso';
                                 data-toggle="modal"
                                 data-target="#modalPrimusGFS"
                                 data-url="{{ App::currentLocale() == 'es'
-                                        ? route('es.certificaciones.primusgfs')
-                                        : route('en.certificaciones.primusgfs') }}"
+                                        ? route('es.certificaciones')
+                                        : route('en.certificaciones') }}"
                                 aria-label="{{ App::currentLocale() == 'es'
                                         ? 'Ver ranchos certificados PrimusGFS'
                                         : 'View PrimusGFS certified ranches' }}">

@@ -242,6 +242,11 @@
 							<img src="/site/img/certificaciones/07.jpg" class="img-fluid" loading="lazy" alt="">
 						</a>
 					</div>
+                    <div class="col-7 col-md">
+    					<a href="" target="_blank">
+							<img src="/site/img/certificaciones/08.png" class="img-fluid" loading="lazy" alt="">
+						</a>
+					</div>
 				</div>
 				<div class="mt-5 text-center">
 					<a href="{{ route( App::currentLocale() . '.compromiso') }}#sa" class="button bg-azul-marino text-white f600 text-uppercase editable" data-key="seguridad_alimentaria" data-group="home">
