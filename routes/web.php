@@ -63,8 +63,8 @@ Route::get('/en/commitment', [SiteController::class, 'compromiso'])->name('en.co
 
 //Certificaciones
 // Certificaciones - Página estática (con nombres por idioma)
-Route::get('/certificaciones', [App\Http\Controllers\SiteController::class, 'certificaciones'])->name('es.certificaciones');
-Route::get('/en/certifications', [App\Http\Controllers\SiteController::class, 'certificaciones'])->name('en.certificaciones');
+Route::get('/certificaciones', [SiteController::class, 'certificaciones'])->name('es.certificaciones');
+Route::get('/en/certifications', [SiteController::class, 'certificaciones'])->name('en.certificaciones');
 
 // Descarga de PDF (protegida)
 Route::get('/certificaciones/descargar/{certificacion}', [CertificacionController::class, 'descargar'])->name('certificaciones.descargar');

@@ -34,7 +34,7 @@
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
                         <li>
                             <a class="dropdown-item" href="{{ route( App::currentLocale() . '.compromiso') }}">{!!trans('web.menu_compromiso_text')!!}</a>
-                            <a class="dropdown-item" href="{{ route( App::currentLocale() . '.certificaciones') }}">{!!trans('web.certificaciones')!!}</a>
+                            <a class="dropdown-item" href="{{ route( App::currentLocale() . '.certificaciones') }}">{!!trans('web.menu_certificaciones_text')!!}</a>
                         </li>
                     </div>
                 </div>
@@ -109,7 +109,7 @@
             <li><a href="{{ route( App::currentLocale() . '.inicio') }}" class="menu__item">{{ trans('web.menu_home_text') }}</a></li>
             <li><a href="{{ route( App::currentLocale() . '.nosotros') }}" class="menu__item">{{ trans('web.menu_nosotros_text') }}</a></li>
             <li><a href="{{ route( App::currentLocale() . '.compromiso') }}" class="menu__item">{{ trans('web.menu_compromiso_text') }}</a></li>
-            <li><a href="{{ route( App::currentLocale() . '.certificaciones') }}" class="menu__item">{{ trans('web.certificaciones') }}</a></li>
+            <li><a href="{{ route( App::currentLocale() . '.certificaciones') }}" class="menu__item">{{ trans('web.menu_certificaciones_text') }}</a></li>
             <li><a href="{{ route( App::currentLocale() . '.productos') }}" class="menu__item">{{ trans('web.menu_productos_text') }}</a></li>
             <li><a href="{{ route( App::currentLocale() . '.recetas') }}" class="menu__item">{{ trans('web.menu_recetas_text') }}</a></li>
             <li><a href="{{ route( App::currentLocale() . '.contacto') }}" class="menu__item">{{ trans('web.menu_contacto_text') }}</a></li>
