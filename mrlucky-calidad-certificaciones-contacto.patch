@@ -1,0 +1,1666 @@
+diff --git a/DOCUMENTO_ENTREGA.md b/DOCUMENTO_ENTREGA.md
+new file mode 100644
+index 0000000..d4f2e65
+--- /dev/null
++++ b/DOCUMENTO_ENTREGA.md
+@@ -0,0 +1,149 @@
++# Documento de entrega — Calidad, Certificaciones, Control de Descargas y Contacto
++**Sitio:** Mr. Lucky · **Rama:** `feature/calidad-certificaciones-contacto` (base: `dev`)
++**Fecha:** 23 de julio de 2026
++
++Archivo de referencia: `mrlucky-calidad-certificaciones-contacto.patch` (aplica limpio sobre `dev` con `git apply` o `git am`).
++
++---
++
++## 1. Cómo aplicar el patch
++
++```bash
++git checkout dev
++git pull
++git checkout -b feature/calidad-certificaciones-contacto
++git apply mrlucky-calidad-certificaciones-contacto.patch
++# o, si prefieren conservar el commit y el mensaje tal cual:
++git am mrlucky-calidad-certificaciones-contacto.patch
++
++composer install
++php artisan migrate
++php artisan config:clear
++php artisan view:clear
++php artisan cache:clear   # limpia mosaico.*.publico y tipo_cert.* si estaban en cache
++```
++
++No se corrieron `composer install` ni `php artisan migrate` en el entorno donde se preparó este patch (sandbox sin acceso a `getcomposer.org` ni a una base de datos). Todo el PHP nuevo/modificado se validó con `php -l` (sin errores de sintaxis) y el patch se verificó aplicando limpio sobre una copia fresca de `dev`, pero **falta la prueba funcional real contra la base de datos y el servidor SMTP de Gerencia** antes de pasar a producción.
++
++---
++
++## 2. Qué se modificó y por qué
++
++### 2.1 Menú CALIDAD / QUALITY
++- El submenú `CALIDAD → Calidad / Certificaciones` **ya existía estructuralmente** en `resources/views/site/partials/header.blade.php` (antes con la etiqueta "Compromiso"). No hizo falta tocar rutas ni vistas del menú.
++- El texto del menú **no vive en un archivo de idioma**: el proyecto usa `spatie/laravel-translation-loader` (`config/translation-loader.php`), que lee las traducciones desde la tabla `language_lines`. Por eso el cambio de texto se hizo con una **migración de datos**: `database/migrations/2026_07_23_000001_update_menu_calidad_label.php`, que actualiza (o inserta si no existe) la fila `group=web, key=menu_compromiso_text` a `{"es":"Calidad","en":"Quality"}`. La clase CSS `text-uppercase` del toggle del dropdown hace que se muestre "CALIDAD"/"QUALITY" arriba y "Calidad"/"Quality" en el submenú, sin duplicar textos.
++
++### 2.2 Bug encontrado: tabla de certificados
++- La migración `2024_01_01_000003_create_certificaciones_table.php` crea la tabla `certificaciones` (plural), pero `app/Models/Certificacion.php` apuntaba a `certificacion` (singular). **El módulo de certificados no podía funcionar en absoluto** con ese desajuste. Se corrigió el `$table` del modelo.
++
++### 2.3 Bloqueo de descarga directa + visor + solicitud (certificados por rancho)
++- `app/Http/Controllers/CertificacionController.php`:
++  - `ver()` — sirve el PDF con `Content-Disposition: inline` (visor, no descarga). Sigue validando `visible_publico` y que el archivo exista en el disco `private`.
++  - `solicitarDescarga()` / `enviarSolicitudDescarga()` — muestra y procesa el formulario de solicitud. Valida en backend con `SolicitudDescargaCertificadoRequest`, registra la solicitud en `solicitudes_descarga_certificado` (auditoría) y envía el correo a los destinatarios de `config('certificaciones.request_recipients')` — **nunca** a un destinatario definido por el usuario.
++  - Se eliminó la ruta pública `certificaciones.descargar` (entregaba el PDF directo sin ningún control).
++- `resources/views/site/partials/certificados-mosaico.blade.php`: el botón "Descargar Certificado" se reemplazó por dos botones — **"Ver Certificado"** (visor) y **"Solicitar Descarga"** (formulario).
++
++### 2.4 Bug encontrado: certificados generales servidos como PDF público
++- 6 archivos (`ccof.pdf`, `c-tpat.pdf`, `sqf.pdf`, `kosher.pdf`, `FTUSA_CRT.pdf`, `smeta.pdf`) vivían en `public/site/certificaciones/` y se enlazaban de forma **directa y descargable** desde 3 páginas (`inicio`, `compromiso`, `certificaciones`). Esto es exactamente el escenario que el requerimiento pide evitar (punto 9/10).
++- Se movieron a `storage/app/private/certificaciones-generales/` (fuera de `/public`) y ahora se sirven solo vía `CertificacionController@verGeneral` (inline). Se agregó también un flujo de solicitud de descarga equivalente (`solicitarDescargaGeneral` / `enviarSolicitudDescargaGeneral`), reutilizando el mismo `Mailable` y la misma plantilla de correo.
++- **Nota:** el archivo `POLITICA_DE_PRIVACIDAD_MR_LUCKY.pdf`, que está en la misma carpeta pública, **no se tocó** — no es un certificado y su naturaleza (política pública) justifica que siga siendo descargable directamente.
++
++### 2.5 Formulario de solicitud de descarga (nuevo)
++- Vista: `resources/views/site/pages/certificado-solicitud.blade.php`. Campos: Nombre, Puesto, Empresa, Correo, Teléfono, Contacto en GAB, Uso (textarea con límite de caracteres). Incluye honeypot anti-spam, `old()` para no perder datos si hay error, mensaje de éxito/error accesible (`aria-live`), y bloqueo de doble envío en el botón.
++- **Contacto en GAB:** se revisó el proyecto y no existe ningún catálogo de contactos/ejecutivos de GAB (no hay modelo `Contacto`, `Ejecutivo`, etc.). Por eso se implementó como campo de texto libre, tal como indica el punto 14 del requerimiento cuando no existe catálogo. Si Gerencia confirma que sí existe un catálogo en otro sistema, se puede sustituir fácilmente por un `<select>`.
++- Backend: `app/Http/Requests/SolicitudDescargaCertificadoRequest.php` (validación obligatoria en todos los campos), `app/Mail/SolicitudDescargaCertificadoMail.php`, plantilla `resources/views/mails/solicitud-descarga-certificado.blade.php`.
++- Registro/auditoría: tabla `solicitudes_descarga_certificado` (migración `2026_07_23_000002_...`), guarda también IP de origen, y si el envío de correo falla, el registro queda marcado `estado_envio = error` con el detalle, y se loguea con `Log::error()` — el usuario solo ve un mensaje amigable, nunca el error técnico.
++
++### 2.6 Formulario de Contacto — auditoría y correcciones
++Se encontraron 3 problemas reales que coinciden con lo reportado por Gerencia:
++
++1. **"Ventas Nacional" no tenía correo configurado** (`<option value="">`) → explica por qué el correo de prueba de Gerencia para esa área nunca llegó.
++2. **"Mantenimiento" tampoco tenía correo configurado** (mismo problema, aunque no fue mencionado explícitamente por Gerencia).
++3. **Typo de dominio:** `msamano@mrluccky.com.mx` (doble "c") en una opción duplicada con la etiqueta "Capital Humano".
++4. **Riesgo de seguridad:** el valor del `<select name="area">` era literalmente la dirección de correo de destino, tomada tal cual por el backend (`explode(',', $data['area'])`) — el destinatario dependía 100% de lo que llegara desde el navegador.
++5. **El correo se enviaba con `from()` = correo del visitante** — muchos servidores SMTP rechazan o marcan como spam mensajes enviados "desde" un dominio externo sin SPF/DKIM válido, lo cual puede explicar entregas fallidas o silenciosas incluso cuando el destinatario sí estaba bien configurado.
++6. La plantilla de correo (`mails/contacto.blade.php`) tenía `href='mailto:$email'` — variable PHP cruda sin sintaxis Blade, por lo que el enlace nunca mostraba el correo real.
++
++**Corrección aplicada:**
++- `config/contacto.php` centraliza el mapeo *clave de área → correo(s)*, configurable 100% por variables de entorno (nunca hardcodeado en el controlador).
++- El `<select>` del formulario ahora envía claves (`sistemas`, `ventas_nacional`, etc.), no correos. El backend valida contra la lista blanca de claves (`Rule::in(...)`) y resuelve el correo real.
++- `app/Mail/ContactoMail.php` envía desde `MAIL_FROM_ADDRESS`/`MAIL_FROM_NAME` y pone el correo del visitante en `replyTo` (así "Responder" en el cliente de correo sí va al visitante, pero el remitente técnico es siempre del dominio propio).
++- Se agregó `Fecha`, `Hora` y `Área` al cuerpo del correo (punto 26 del requerimiento) y se corrigió el `mailto`.
++- Manejo de errores: si el correo no puede enviarse (incluyendo el caso de área sin correo configurado), se registra en logs y se muestra un mensaje amigable — nunca un error SMTP crudo.
++- Rate limiting (`throttle:5,1`) en las rutas POST de Contacto y de solicitud de descarga.
++
++**Pendiente — no se puede resolver sin Gerencia:** los correos reales de **Ventas Nacional** y **Mantenimiento** no estaban en ningún lugar del código ni en el requerimiento, así que **no se inventaron**. Deben configurarse en `.env` (`CONTACTO_VENTAS_NACIONAL`, `CONTACTO_MANTENIMIENTO`) antes de salir a producción; mientras tanto, el sistema no falla en silencio: registra el intento en logs y muestra el mensaje de error amigable al usuario.
++
++### 2.7 Analytics (hooks, no una segunda plataforma)
++Se agregaron atributos `data-analytics-event="certificate_view"`, `certificate_request_open`, `data-analytics-event-submit="certificate_request_submit"` en los botones/formularios nuevos, para que se conecten al Matomo ya existente en el sitio (`matomo.txt`) sin introducir una segunda herramienta. No se implementó el listener JS de Matomo en este patch — requiere confirmar el snippet de tracking real que usa el sitio en producción.
++
++---
++
++## 3. Variables de entorno requeridas
++
++Agregar a `.env` (no se tocó `.env` real del proyecto; estos son los nombres a configurar):
++
++```env
++# Destinatarios de solicitudes de descarga de certificados (punto 19 del requerimiento)
++CERTIFICATE_REQUEST_RECIPIENTS=mrhernandez@mrlucky.com.mx,msamano@mrlucky.com.mx,mercadotecnia@mrlucky.com.mx,comprasmp@mrlucky.com.mx,adrian.ortega@mrlucky.com.mx
++
++# Enrutamiento del formulario de Contacto por área
++CONTACTO_CAPITAL_HUMANO=rosa.rodriguez@mrlucky.com.mx
++CONTACTO_CALIDAD=mrhernandez@mrlucky.com.mx
++CONTACTO_PROVEEDORES=comprasmp@mrlucky.com.mx,comprasmateriales@mrlucky.com.mx
++CONTACTO_MERCADOTECNIA=mercadotecnia@mrlucky.com.mx
++CONTACTO_RH2=msamano@mrlucky.com.mx
++CONTACTO_SISTEMAS=sistemas@mrlucky.com.mx
++CONTACTO_VENTAS_EXPORTACION=orders@mrlucky.com.mx
++
++# ⚠️ PENDIENTE DE GERENCIA — sin estos dos, esas áreas seguirán sin recibir mensajes:
++CONTACTO_MANTENIMIENTO=
++CONTACTO_VENTAS_NACIONAL=
++
++# Correo remitente del sitio (para que "From" sea del dominio propio, no el del visitante)
++MAIL_FROM_ADDRESS=noreply@mrlucky.com.mx
++MAIL_FROM_NAME="Mr. Lucky"
++
++# SMTP (verificar que ya estén correctamente configurados en el .env real)
++MAIL_MAILER=smtp
++MAIL_HOST=
++MAIL_PORT=
++MAIL_USERNAME=
++MAIL_PASSWORD=
++MAIL_ENCRYPTION=
++```
++
++Si `CONTACTO_MANTENIMIENTO` o `CONTACTO_VENTAS_NACIONAL` quedan vacías, el sistema **no envía a nadie por error** ni inventa un destinatario: registra el intento en logs (`storage/logs/laravel.log`) y muestra al usuario el mensaje "No fue posible enviar tu mensaje en este momento."
++
++---
++
++## 4. Matriz de pruebas
++
++| Funcionalidad | Desktop | Tablet | Mobile | Resultado |
++|---|---|---|---|---|
++| Menú CALIDAD (antes Compromiso) | Pendiente | Pendiente | Pendiente | Requiere `php artisan migrate` + prueba visual |
++| Submenú Calidad / Certificaciones | Pendiente | Pendiente | Pendiente | Estructura ya existía; solo cambia el texto |
++| Página Certificaciones (galería general) | Pendiente | Pendiente | Pendiente | Enlaces ya no son descarga directa |
++| Visor de certificado (por rancho) | Pendiente | Pendiente | Pendiente | Verificar `Content-Disposition: inline` en cada navegador |
++| Bloqueo de descarga directa | Pendiente | Pendiente | Pendiente | Confirmar que no exista ruta pública al PDF original |
++| Formulario "Solicitar Descarga" | Pendiente | Pendiente | Pendiente | Validar campos obligatorios, honeypot, límite de "Uso" |
++| Envío de solicitud de certificado a los 5 destinatarios | Pendiente | — | — | Requiere SMTP real configurado |
++| Contacto — Sistemas | Pendiente | Pendiente | Pendiente | Antes ya tenía correo; confirmar entrega tras el fix de "From" |
++| Contacto — Ventas Nacional | Pendiente | Pendiente | Pendiente | **Bloqueado hasta que Gerencia dé el correo real** |
++| Contacto — Mantenimiento | Pendiente | Pendiente | Pendiente | **Bloqueado hasta que Gerencia dé el correo real** |
++| Contacto — demás áreas (Capital Humano, Calidad, Proveedores, Mercadotecnia, RH2, Ventas Exportación) | Pendiente | Pendiente | Pendiente | Confirmar entrega uno por uno |
++| Resoluciones de `InformeWeb.xml` (360×771, 360×802, 394×853, 414×896, 424×753, 440×956, 600×960, 1024×720, 1512×982, 1536×864, 1920×1080, 2240×1260) | Pendiente | Pendiente | Pendiente | El CSS agregado usa flex/clamp, sin breakpoints fijos por resolución; falta prueba visual real en cada una |
++
++**Nota:** ninguna casilla se marcó "OK" porque este patch no se ejecutó contra una base de datos ni un servidor SMTP reales (limitación del entorno donde se preparó). La matriz queda lista para que el equipo la complete al desplegar en un entorno de pruebas.
++
++---
++
++## 5. Limitación de seguridad (debe documentarse también de cara a Gerencia)
++
++No es posible impedir al 100% que alguien capture o guarde un documento que puede visualizar en pantalla (por ejemplo, "Imprimir como PDF" del navegador). Lo que sí se logró: eliminar el botón de descarga directa, el enlace público al archivo original, la ruta pública obvia hacia el documento, y controlar el acceso a través del backend con registro de cada solicitud.
++
++## 6. No-regresión — qué falta verificar tras aplicar el patch
++- Menú, navegación e idiomas (ES/EN).
++- Flipbooks y demás descargas que sí deben seguir siendo públicas (ej. `POLITICA_DE_PRIVACIDAD_MR_LUCKY.pdf`, que no se tocó).
++- Que `php artisan migrate` corra sin errores (la migración del menú es idempotente: si la fila no existe, la crea).
++- Que el cache de `mosaico.*.publico` y `tipo_cert.*` se limpie tras el despliegue (`php artisan cache:clear` o `CertificacionController::invalidarCache()`).
+diff --git a/app/Http/Controllers/CertificacionController.php b/app/Http/Controllers/CertificacionController.php
+index 4bca094..4caba92 100644
+--- a/app/Http/Controllers/CertificacionController.php
++++ b/app/Http/Controllers/CertificacionController.php
+@@ -2,35 +2,41 @@
+ 
+ namespace App\Http\Controllers;
+ 
++use App\Mail\SolicitudDescargaCertificadoMail;
+ use App\Models\Certificacion;
+-use Illuminate\Http\Request;
+-use Illuminate\Support\Facades\Storage;
++use App\Models\SolicitudDescargaCertificado;
++use App\Http\Requests\SolicitudDescargaCertificadoRequest;
++use Illuminate\Support\Facades\App;
+ use Illuminate\Support\Facades\Cache;
++use Illuminate\Support\Facades\Log;
++use Illuminate\Support\Facades\Mail;
++use Illuminate\Support\Facades\Storage;
+ use Symfony\Component\HttpFoundation\StreamedResponse;
+ 
+ class CertificacionController extends Controller
+ {
+     /**
+-     * Descarga protegida de certificado PDF.
++     * Visor protegido del certificado (SOLO LECTURA / "inline").
+      *
+-     * SEGURIDAD:
+-     *  - Los PDFs están en storage/app/private/certificados/ (disco 'private').
+-     *  - Nunca son accesibles por URL directa desde el navegador.
+-     *  - Este método valida visible_publico antes de servir cualquier archivo.
+-     *  - Laravel Route Model Binding carga el Certificacion por ID.
++     * Requerimiento de Gerencia: los certificados se pueden consultar
++     * libremente, pero NO deben poder descargarse directamente desde la
++     * interfaz pública. Este método sirve el PDF con
++     * `Content-Disposition: inline`, para que el navegador lo muestre en el
++     * visor en lugar de descargarlo, y nunca expone una ruta pública directa
++     * al archivo (el archivo vive en el disco 'private', fuera de /public).
+      *
+-     * Ruta:
+-     *   GET /certificaciones/descargar/{certificacion}  → certificaciones.descargar
+-     *
+-     * @param  Certificacion  $certificacion  Inyectado por Route Model Binding
+-     * @return StreamedResponse
++     * LIMITACION CONOCIDA (ver punto 11 del requerimiento): esto no impide
++     * al 100% que alguien capture o guarde el documento mostrado en pantalla
++     * (por ejemplo con "Imprimir como PDF" del navegador). Lo que si se logra
++     * es eliminar el boton de descarga directa, el enlace publico al archivo
++     * original y la ruta publica obvia hacia el documento.
+      */
+-    public function descargar(Certificacion $certificacion): StreamedResponse
++    public function ver(Certificacion $certificacion): StreamedResponse
+     {
+         abort_unless(
+             $certificacion->visible_publico,
+             403,
+-            'Este certificado no está disponible para descarga pública.'
++            'Este certificado no esta disponible para consulta publica.'
+         );
+ 
+         abort_unless(
+@@ -39,23 +45,174 @@ class CertificacionController extends Controller
+             'El archivo de certificado no fue encontrado.'
+         );
+ 
+-        // Nombre de descarga: usa el nombre original si existe,
+-        // o construye uno legible a partir del slug del rancho.
+-        $nombreDescarga = $certificacion->pdf_nombre_original
+-            ?? 'certificado-' . $certificacion->rancho->slug . '.pdf';
+-
+-        return Storage::disk('private')->download(
++        return Storage::disk('private')->response(
+             $certificacion->pdf_path,
+-            $nombreDescarga,
+-            ['Content-Type' => 'application/pdf']
++            null,
++            [
++                'Content-Type' => 'application/pdf',
++                // 'inline' evita que el navegador lo trate como descarga.
++                'Content-Disposition' => 'inline; filename="certificado.pdf"',
++                'X-Frame-Options' => 'SAMEORIGIN',
++                'Cache-Control' => 'private, no-store',
++            ]
++        );
++    }
++
++    /**
++     * Muestra el formulario de "Solicitar descarga" para un certificado.
++     */
++    public function solicitarDescarga(Certificacion $certificacion)
++    {
++        abort_unless($certificacion->visible_publico, 403);
++
++        $idioma = App::currentLocale();
++
++        return view('site.pages.certificado-solicitud', compact('certificacion', 'idioma'));
++    }
++
++    /**
++     * Procesa el formulario de solicitud de descarga:
++     *  - Valida en backend (nunca confia solo en JS).
++     *  - Registra la solicitud (log/tabla) para auditoria.
++     *  - Envia el correo a los destinatarios configurados en
++     *    config('certificaciones.request_recipients') - nunca a un
++     *    destinatario definido por el usuario.
++     */
++    public function enviarSolicitudDescarga(SolicitudDescargaCertificadoRequest $request, Certificacion $certificacion)
++    {
++        abort_unless($certificacion->visible_publico, 403);
++
++        $datos = $request->validated();
++        unset($datos['website']); // honeypot, no se persiste
++
++        $ipOrigen = $request->ip();
++
++        $registro = SolicitudDescargaCertificado::create([
++            'certificacion_id' => $certificacion->id,
++            'nombre' => $datos['nombre'],
++            'puesto' => $datos['puesto'],
++            'empresa' => $datos['empresa'],
++            'correo' => $datos['correo'],
++            'telefono' => $datos['telefono'],
++            'contacto_gab' => $datos['contacto_gab'],
++            'uso' => $datos['uso'],
++            'ip_origen' => $ipOrigen,
++            'estado_envio' => 'enviado',
++        ]);
++
++        $destinatarios = config('certificaciones.request_recipients', []);
++
++        try {
++            if (empty($destinatarios)) {
++                throw new \RuntimeException('No hay destinatarios configurados en CERTIFICATE_REQUEST_RECIPIENTS.');
++            }
++
++            $nombreCertificado = $certificacion->rancho->nombre . ' - ' . $certificacion->tipoCertificacion->nombre;
++
++            Mail::to($destinatarios)->send(new SolicitudDescargaCertificadoMail($nombreCertificado, $certificacion->id, $datos));
++        } catch (\Throwable $e) {
++            $registro->update([
++                'estado_envio' => 'error',
++                'error_detalle' => $e->getMessage(),
++            ]);
++
++            Log::error('Error al enviar solicitud de descarga de certificado', [
++                'certificacion_id' => $certificacion->id,
++                'solicitud_id' => $registro->id,
++                'error' => $e->getMessage(),
++            ]);
++
++            return back()
++                ->withInput()
++                ->with('certificado_error', true);
++        }
++
++        return back()->with('certificado_solicitud_enviada', true);
++    }
++
++    /**
++     * Visor protegido (inline) para el catálogo de certificaciones generales
++     * (CCOF, C-TPAT, SQF, Kosher, Fair Trade USA, SMETA), que antes se
++     * servían como PDFs públicos descargables directamente desde /public.
++     */
++    public function verGeneral(string $slug): StreamedResponse
++    {
++        $catalogo = config('certificaciones.catalogo_general', []);
++
++        abort_unless(isset($catalogo[$slug]), 404, 'Certificado no encontrado.');
++
++        $archivo = $catalogo[$slug]['archivo'];
++
++        abort_unless(Storage::disk('private')->exists($archivo), 404, 'El archivo de certificado no fue encontrado.');
++
++        return Storage::disk('private')->response(
++            $archivo,
++            null,
++            [
++                'Content-Type' => 'application/pdf',
++                'Content-Disposition' => 'inline; filename="' . $slug . '.pdf"',
++                'X-Frame-Options' => 'SAMEORIGIN',
++                'Cache-Control' => 'private, no-store',
++            ]
+         );
+     }
+ 
+     /**
+-     * Invalida el cache del mosaico de un tipo de certificación.
++     * Formulario de solicitud de descarga para el catálogo general.
++     */
++    public function solicitarDescargaGeneral(string $slug)
++    {
++        $catalogo = config('certificaciones.catalogo_general', []);
++        abort_unless(isset($catalogo[$slug]), 404);
++
++        $idioma = App::currentLocale();
++        $nombreCertificado = $catalogo[$slug]['nombre'];
++
++        return view('site.pages.certificado-solicitud', [
++            'certificacion' => null,
++            'slugGeneral' => $slug,
++            'nombreCertificado' => $nombreCertificado,
++            'idioma' => $idioma,
++        ]);
++    }
++
++    /**
++     * Procesa la solicitud de descarga del catálogo general.
++     */
++    public function enviarSolicitudDescargaGeneral(SolicitudDescargaCertificadoRequest $request, string $slug)
++    {
++        $catalogo = config('certificaciones.catalogo_general', []);
++        abort_unless(isset($catalogo[$slug]), 404);
++
++        $nombreCertificado = $catalogo[$slug]['nombre'];
++        $datos = $request->validated();
++        unset($datos['website']);
++
++        $destinatarios = config('certificaciones.request_recipients', []);
++
++        try {
++            if (empty($destinatarios)) {
++                throw new \RuntimeException('No hay destinatarios configurados en CERTIFICATE_REQUEST_RECIPIENTS.');
++            }
++
++            Mail::to($destinatarios)->send(new SolicitudDescargaCertificadoMail($nombreCertificado, $slug, $datos));
++        } catch (\Throwable $e) {
++            Log::error('Error al enviar solicitud de descarga de certificado general', [
++                'slug' => $slug,
++                'error' => $e->getMessage(),
++            ]);
++
++            return back()->withInput()->with('certificado_error', true);
++        }
++
++        return back()->with('certificado_solicitud_enviada', true);
++    }
++
++    /**
++     * Invalida el cache del mosaico de un tipo de certificacion.
+      *
+      * Llamar desde RanchoController cada vez que se cree, edite
+-     * o elimine un rancho o certificación desde el admin.
++     * o elimine un rancho o certificacion desde el admin.
+      *
+      * @param  string  $tipo  Slug del tipo (default: 'primusgfs')
+      * @return void
+diff --git a/app/Http/Controllers/SiteController.php b/app/Http/Controllers/SiteController.php
+index 203529b..24b4710 100644
+--- a/app/Http/Controllers/SiteController.php
++++ b/app/Http/Controllers/SiteController.php
+@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
+ use Illuminate\Http\Request;
+ use Illuminate\Support\Facades\Redirect;
+ use Illuminate\Support\Facades\Mail;
++use Illuminate\Support\Facades\Log;
+ use Illuminate\Support\Facades\App;
+ 
+ use App\Models\Idioma;
+@@ -465,7 +466,7 @@ class SiteController extends Controller
+     }
+ 
+     /*---------- Enviar Contacto ----------*/
+-    public function enviarContacto(Request $request)
++    public function enviarContacto(\App\Http\Requests\ContactoRequest $request)
+     {
+         if (!empty($request->input('website'))) {
+             abort(400, 'Bot detectado (honeypot).');
+@@ -473,25 +474,50 @@ class SiteController extends Controller
+ 
+         $token = $request->input('g-recaptcha-response');
+         if (empty($token)) {
+-            return redirect()->back()->withErrors(['captcha' => 'Debes completar el captcha']);
++            return redirect()->back()->withInput()->withErrors(['captcha' => 'Debes completar el captcha']);
+         }
+ 
+         $verificado = $this->verificarToken($token, '6LezXjArAAAAAFONZGhY728H82z4DzsQ5AEpMHoS');
+ 
+-        if ($verificado) {
+-            $data = $request->all();
+-            $enviarA = explode(',', $data['area']);
++        if (!$verificado) {
++            return redirect()->back()->withInput()->withErrors(['captcha' => 'No se pudo verificar el captcha, inténtalo de nuevo.']);
++        }
+ 
+-            Mail::send('mails.contacto', $data, function ($m) use ($data, $enviarA) {
+-                $m->from($data['email'], 'Web Mr Lucky');
+-                $m->to($enviarA);
+-                $m->subject('Contacto web');
+-            });
++        $data = $request->validated();
++        unset($data['website']);
++
++        // SEGURIDAD: el destinatario NUNCA se toma del valor enviado por el
++        // usuario. Se resuelve la clave de área ("sistemas", etc.) contra
++        // config/contacto.php, que centraliza todas las direcciones reales.
++        $areaKey = $data['area'];
++        $areaEmails = config("contacto.areas.$areaKey");
++        $areaLabel = trans(config("contacto.area_labels.$areaKey", 'contacto.area_label'));
++
++        if (empty($areaEmails)) {
++            // Caso "Mantenimiento" / "Ventas Nacional": no hay correo real
++            // configurado todavía (ver config/contacto.php). No fallamos en
++            // silencio: se registra y se avisa amigablemente al usuario.
++            Log::error('Intento de envío de contacto a un área sin correo configurado.', [
++                'area' => $areaKey,
++            ]);
++
++            return redirect()->back()->withInput()->with('contacto_error', true);
++        }
++
++        $enviarA = array_map('trim', explode(',', $areaEmails));
++
++        try {
++            Mail::to($enviarA)->send(new \App\Mail\ContactoMail($data, $areaLabel));
++        } catch (\Throwable $e) {
++            Log::error('Error al enviar el formulario de contacto.', [
++                'area' => $areaKey,
++                'error' => $e->getMessage(),
++            ]);
+ 
+-            return redirect(route(App::currentLocale() . '.inicio') . '?send=1');
++            return redirect()->back()->withInput()->with('contacto_error', true);
+         }
+ 
+-        return redirect(route(App::currentLocale() . '.inicio'));
++        return redirect(route(App::currentLocale() . '.inicio') . '?send=1');
+     }
+ 
+     public function verificarToken($token, $claveSecreta)
+diff --git a/app/Http/Requests/ContactoRequest.php b/app/Http/Requests/ContactoRequest.php
+new file mode 100644
+index 0000000..78f04fc
+--- /dev/null
++++ b/app/Http/Requests/ContactoRequest.php
+@@ -0,0 +1,30 @@
++<?php
++
++namespace App\Http\Requests;
++
++use Illuminate\Foundation\Http\FormRequest;
++use Illuminate\Validation\Rule;
++
++class ContactoRequest extends FormRequest
++{
++    public function authorize(): bool
++    {
++        return true;
++    }
++
++    public function rules(): array
++    {
++        return [
++            'area' => ['required', 'string', Rule::in(array_keys(config('contacto.areas', [])))],
++            'nombre' => ['required', 'string', 'max:150'],
++            'empresa' => ['nullable', 'string', 'max:150'],
++            'telefono' => ['nullable', 'string', 'max:30'],
++            'email' => ['required', 'email:rfc,dns', 'max:150'],
++            'ciudad' => ['required', 'string', 'max:150'],
++            'comentarios' => ['required', 'string', 'max:2000'],
++
++            // Honeypot anti-spam
++            'website' => ['prohibited'],
++        ];
++    }
++}
+diff --git a/app/Http/Requests/SolicitudDescargaCertificadoRequest.php b/app/Http/Requests/SolicitudDescargaCertificadoRequest.php
+new file mode 100644
+index 0000000..d353ac2
+--- /dev/null
++++ b/app/Http/Requests/SolicitudDescargaCertificadoRequest.php
+@@ -0,0 +1,44 @@
++<?php
++
++namespace App\Http\Requests;
++
++use Illuminate\Foundation\Http\FormRequest;
++
++class SolicitudDescargaCertificadoRequest extends FormRequest
++{
++    public function authorize(): bool
++    {
++        return true;
++    }
++
++    public function rules(): array
++    {
++        return [
++            'nombre' => ['required', 'string', 'max:150'],
++            'puesto' => ['required', 'string', 'max:150'],
++            'empresa' => ['required', 'string', 'max:150'],
++            'correo' => ['required', 'email:rfc,dns', 'max:150'],
++            'telefono' => ['required', 'string', 'max:30', 'regex:/^[0-9+\-\s()]{7,30}$/'],
++            'contacto_gab' => ['required', 'string', 'max:150'],
++            'uso' => ['required', 'string', 'max:' . config('certificaciones.uso_max_length', 500)],
++
++            // Honeypot anti-spam: campo invisible que un humano nunca llena.
++            'website' => ['prohibited'],
++        ];
++    }
++
++    public function messages(): array
++    {
++        return [
++            'nombre.required' => 'El nombre es obligatorio.',
++            'puesto.required' => 'El puesto es obligatorio.',
++            'empresa.required' => 'La empresa es obligatoria.',
++            'correo.required' => 'El correo electrónico es obligatorio.',
++            'correo.email' => 'El correo electrónico no es válido.',
++            'telefono.required' => 'El teléfono es obligatorio.',
++            'telefono.regex' => 'El teléfono no es válido.',
++            'contacto_gab.required' => 'El contacto en GAB es obligatorio.',
++            'uso.required' => 'Debe describir el uso que dará al certificado.',
++        ];
++    }
++}
+diff --git a/app/Mail/ContactoMail.php b/app/Mail/ContactoMail.php
+new file mode 100644
+index 0000000..3e9d6e7
+--- /dev/null
++++ b/app/Mail/ContactoMail.php
+@@ -0,0 +1,36 @@
++<?php
++
++namespace App\Mail;
++
++use Illuminate\Bus\Queueable;
++use Illuminate\Mail\Mailable;
++use Illuminate\Queue\SerializesModels;
++
++class ContactoMail extends Mailable
++{
++    use Queueable, SerializesModels;
++
++    public array $datos;
++    public string $areaLabel;
++
++    public function __construct(array $datos, string $areaLabel)
++    {
++        $this->datos = $datos;
++        $this->areaLabel = $areaLabel;
++    }
++
++    public function build()
++    {
++        return $this
++            // BUGFIX: antes se usaba el correo del visitante como "from",
++            // lo que hace que muchos servidores SMTP rechacen o marquen como
++            // spam el mensaje (falla de SPF/DKIM al enviar "desde" un dominio
++            // externo). Ahora se envía desde la dirección configurada del
++            // sitio y el correo del visitante va en "replyTo".
++            ->from(config('mail.from.address'), config('mail.from.name'))
++            ->replyTo($this->datos['email'], $this->datos['nombre'] ?? null)
++            ->subject('Nuevo mensaje de contacto web - ' . $this->areaLabel)
++            ->view('mails.contacto')
++            ->with(array_merge($this->datos, ['areaLabel' => $this->areaLabel]));
++    }
++}
+diff --git a/app/Mail/SolicitudDescargaCertificadoMail.php b/app/Mail/SolicitudDescargaCertificadoMail.php
+new file mode 100644
+index 0000000..6eccc12
+--- /dev/null
++++ b/app/Mail/SolicitudDescargaCertificadoMail.php
+@@ -0,0 +1,43 @@
++<?php
++
++namespace App\Mail;
++
++use Illuminate\Bus\Queueable;
++use Illuminate\Mail\Mailable;
++use Illuminate\Queue\SerializesModels;
++
++class SolicitudDescargaCertificadoMail extends Mailable
++{
++    use Queueable, SerializesModels;
++
++    public array $datos;
++    public string $nombreCertificado;
++    public string|int $idCertificado;
++
++    /**
++     * @param  string      $nombreCertificado  Nombre legible del certificado solicitado
++     * @param  string|int  $idCertificado      ID o slug interno del certificado
++     * @param  array       $datos              Datos ya validados del formulario
++     *                                         (nombre, puesto, empresa, correo, telefono, contacto_gab, uso)
++     */
++    public function __construct(string $nombreCertificado, string|int $idCertificado, array $datos)
++    {
++        $this->nombreCertificado = $nombreCertificado;
++        $this->idCertificado = $idCertificado;
++        $this->datos = $datos;
++    }
++
++    public function build()
++    {
++        return $this
++            ->from(config('mail.from.address'), config('mail.from.name'))
++            ->replyTo($this->datos['correo'], $this->datos['nombre'])
++            ->subject('Solicitud de descarga de certificado - ' . $this->nombreCertificado)
++            ->view('mails.solicitud-descarga-certificado')
++            ->with([
++                'nombreCertificado' => $this->nombreCertificado,
++                'idCertificado' => $this->idCertificado,
++                'datos' => $this->datos,
++            ]);
++    }
++}
+diff --git a/app/Models/Certificacion.php b/app/Models/Certificacion.php
+index efe4931..fac91a3 100644
+--- a/app/Models/Certificacion.php
++++ b/app/Models/Certificacion.php
+@@ -10,7 +10,11 @@ class Certificacion extends Model
+ {
+     use SoftDeletes;
+ 
+-    protected $table = 'certificacion';
++    // BUGFIX: la migración crea la tabla en plural ('certificaciones'),
++    // pero el modelo apuntaba a 'certificacion' (singular). Esto rompía
++    // toda consulta sobre certificados. Se corrige para que coincida con
++    // database/migrations/2024_01_01_000003_create_certificaciones_table.php
++    protected $table = 'certificaciones';
+     protected $fillable = [
+         'rancho_id',
+         'tipo_certificacion_id',
+@@ -118,7 +122,7 @@ class Certificacion extends Model
+     }
+ 
+     /**
+-     * URL de descarga del PDF.
++     * URL para CONSULTAR el PDF en el visor (inline, sin descargar).
+      *
+      * SIEMPRE apunta al controlador — nunca a una ruta pública directa.
+      * El controlador valida visible_publico antes de servir el archivo.
+@@ -126,9 +130,30 @@ class Certificacion extends Model
+     public function getPdfUrlAttribute(): ?string
+     {
+         if ($this->pdf_path) {
+-            return route('certificaciones.descargar', $this->id);
++            $routeName = \Illuminate\Support\Facades\App::currentLocale() === 'en'
++                ? 'en.certificaciones.ver'
++                : 'certificaciones.ver';
++
++            return route($routeName, $this->id);
+         }
+ 
+         return null;
+     }
++
++    /**
++     * URL para abrir el formulario de "Solicitar descarga" de este certificado.
++     * Ya NO existe una ruta pública que entregue el PDF directamente.
++     */
++    public function getSolicitudDescargaUrlAttribute(): ?string
++    {
++        if (!$this->pdf_path) {
++            return null;
++        }
++
++        $routeName = \Illuminate\Support\Facades\App::currentLocale() === 'en'
++            ? 'en.certificaciones.solicitar_descarga'
++            : 'certificaciones.solicitar_descarga';
++
++        return route($routeName, $this->id);
++    }
+ }
+diff --git a/app/Models/SolicitudDescargaCertificado.php b/app/Models/SolicitudDescargaCertificado.php
+new file mode 100644
+index 0000000..f2b5e67
+--- /dev/null
++++ b/app/Models/SolicitudDescargaCertificado.php
+@@ -0,0 +1,30 @@
++<?php
++
++namespace App\Models;
++
++use Illuminate\Database\Eloquent\Model;
++use Illuminate\Database\Eloquent\Relations\BelongsTo;
++
++class SolicitudDescargaCertificado extends Model
++{
++    protected $table = 'solicitudes_descarga_certificado';
++
++    protected $fillable = [
++        'certificacion_id',
++        'nombre',
++        'puesto',
++        'empresa',
++        'correo',
++        'telefono',
++        'contacto_gab',
++        'uso',
++        'ip_origen',
++        'estado_envio',
++        'error_detalle',
++    ];
++
++    public function certificacion(): BelongsTo
++    {
++        return $this->belongsTo(Certificacion::class, 'certificacion_id');
++    }
++}
+diff --git a/config/certificaciones.php b/config/certificaciones.php
+new file mode 100644
+index 0000000..0f55419
+--- /dev/null
++++ b/config/certificaciones.php
+@@ -0,0 +1,76 @@
++<?php
++
++return [
++
++    /*
++    |--------------------------------------------------------------------------
++    | Destinatarios de solicitudes de descarga de certificados
++    |--------------------------------------------------------------------------
++    |
++    | Requerimiento de Gerencia: cuando un usuario solicita la descarga de un
++    | certificado, el correo debe llegar a esta lista fija de destinatarios.
++    | Se definen por variable de entorno para no hardcodear direcciones en
++    | controladores ni repetirlas en varios archivos (ver punto 19 del
++    | requerimiento: CERTIFICATE_REQUEST_RECIPIENTS).
++    |
++    | Formato en .env (separado por comas, sin espacios):
++    | CERTIFICATE_REQUEST_RECIPIENTS=mrhernandez@mrlucky.com.mx,msamano@mrlucky.com.mx,mercadotecnia@mrlucky.com.mx,comprasmp@mrlucky.com.mx,adrian.ortega@mrlucky.com.mx
++    |
++    */
++    'request_recipients' => array_filter(array_map(
++        'trim',
++        explode(',', env('CERTIFICATE_REQUEST_RECIPIENTS', implode(',', [
++            'mrhernandez@mrlucky.com.mx',
++            'msamano@mrlucky.com.mx',
++            'mercadotecnia@mrlucky.com.mx',
++            'comprasmp@mrlucky.com.mx',
++            'adrian.ortega@mrlucky.com.mx',
++        ])))
++    )),
++
++    /*
++    |--------------------------------------------------------------------------
++    | Límite del campo "Uso"
++    |--------------------------------------------------------------------------
++    */
++    'uso_max_length' => 500,
++
++    /*
++    |--------------------------------------------------------------------------
++    | Catálogo de certificaciones generales (no ligadas a un rancho)
++    |--------------------------------------------------------------------------
++    |
++    | Estos PDFs vivían en /public/site/certificaciones/*.pdf, accesibles
++    | públicamente y descargables de forma directa (ver requerimiento punto 9
++    | y 10). Se movieron al disco 'private' (storage/app/private/
++    | certificaciones-generales/) y ahora se sirven únicamente a través de
++    | CertificacionController@verGeneral (visor inline, sin descarga directa).
++    */
++    'catalogo_general' => [
++        'ccof' => [
++            'nombre' => 'CCOF Organic',
++            'archivo' => 'certificaciones-generales/ccof.pdf',
++        ],
++        'c-tpat' => [
++            'nombre' => 'C-TPAT',
++            'archivo' => 'certificaciones-generales/c-tpat.pdf',
++        ],
++        'sqf' => [
++            'nombre' => 'SQF',
++            'archivo' => 'certificaciones-generales/sqf.pdf',
++        ],
++        'kosher' => [
++            'nombre' => 'Kosher',
++            'archivo' => 'certificaciones-generales/kosher.pdf',
++        ],
++        'ftusa' => [
++            'nombre' => 'Fair Trade USA',
++            'archivo' => 'certificaciones-generales/FTUSA_CRT.pdf',
++        ],
++        'smeta' => [
++            'nombre' => 'SMETA',
++            'archivo' => 'certificaciones-generales/smeta.pdf',
++        ],
++    ],
++
++];
+diff --git a/config/contacto.php b/config/contacto.php
+new file mode 100644
+index 0000000..dc7c0ad
+--- /dev/null
++++ b/config/contacto.php
+@@ -0,0 +1,65 @@
++<?php
++
++/**
++ * Enrutamiento del formulario de Contacto por área (requerimiento punto 24).
++ *
++ * IMPORTANTE: el HTML del formulario ya NO envía una dirección de correo
++ * como valor de la opción seleccionada (eso permitía que, en teoría, se
++ * manipulara el destino desde el navegador). Ahora cada <option> envía una
++ * CLAVE (ej. "sistemas"), y el backend resuelve esa clave a los correos
++ * reales usando este archivo. Si la clave no existe aquí, la solicitud se
++ * rechaza — nunca se usa un valor arbitrario del usuario como destinatario.
++ *
++ * Todas las direcciones son configurables por variable de entorno para no
++ * hardcodear correos repetidos en varios archivos.
++ */
++return [
++
++    'areas' => [
++        'capital_humano' => env('CONTACTO_CAPITAL_HUMANO', 'rosa.rodriguez@mrlucky.com.mx'),
++        'calidad' => env('CONTACTO_CALIDAD', 'mrhernandez@mrlucky.com.mx'),
++        'proveedores' => env('CONTACTO_PROVEEDORES', 'comprasmp@mrlucky.com.mx,comprasmateriales@mrlucky.com.mx'),
++
++        // BUGFIX detectado en auditoría: este <option> no tenía ningún correo
++        // configurado (value=""), por lo que los mensajes de esta área nunca
++        // llegaban a nadie. Gerencia debe confirmar/proveer el correo real de
++        // "Mantenimiento" en CONTACTO_MANTENIMIENTO; mientras tanto queda null
++        // y el formulario mostrará un error amigable en vez de fallar en
++        // silencio o inventar un destinatario.
++        'mantenimiento' => env('CONTACTO_MANTENIMIENTO', null),
++
++        'mercadotecnia' => env('CONTACTO_MERCADOTECNIA', 'mercadotecnia@mrlucky.com.mx'),
++
++        // BUGFIX: el <option> original tenía el correo "msamano@mrluccky.com.mx"
++        // (dominio con doble "c", typo). Se corrige a mrlucky.com.mx, que es el
++        // dominio usado en el resto del sitio y en el requerimiento de Gerencia.
++        'recursos_humanos_2' => env('CONTACTO_RH2', 'msamano@mrlucky.com.mx'),
++
++        'sistemas' => env('CONTACTO_SISTEMAS', 'sistemas@mrlucky.com.mx'),
++        'ventas_exportacion' => env('CONTACTO_VENTAS_EXPORTACION', 'orders@mrlucky.com.mx'),
++
++        // BUGFIX: igual que "mantenimiento" — el <option> de Ventas Nacional
++        // no tenía correo configurado (value=""). Esto explica por qué los
++        // correos de prueba de Gerencia para Ventas Nacional nunca llegaron.
++        // Debe confirmarse el correo real en CONTACTO_VENTAS_NACIONAL.
++        'ventas_nacional' => env('CONTACTO_VENTAS_NACIONAL', null),
++    ],
++
++    /*
++    |--------------------------------------------------------------------------
++    | Etiquetas legibles por área (clave de traducción en el grupo "contacto")
++    |--------------------------------------------------------------------------
++    */
++    'area_labels' => [
++        'capital_humano' => 'contacto.capitalhumano_label',
++        'calidad' => 'contacto.calidad',
++        'proveedores' => 'contacto.proveedores',
++        'mantenimiento' => 'contacto.mantenimiento',
++        'mercadotecnia' => 'contacto.mercadotecnia',
++        'recursos_humanos_2' => 'contacto.capitalhumano_label',
++        'sistemas' => 'contacto.sistemas',
++        'ventas_exportacion' => 'contacto.ventasexportacion',
++        'ventas_nacional' => 'contacto.ventasnacional',
++    ],
++
++];
+diff --git a/database/migrations/2026_07_23_000001_update_menu_calidad_label.php b/database/migrations/2026_07_23_000001_update_menu_calidad_label.php
+new file mode 100644
+index 0000000..180f02f
+--- /dev/null
++++ b/database/migrations/2026_07_23_000001_update_menu_calidad_label.php
+@@ -0,0 +1,74 @@
++<?php
++
++use Illuminate\Database\Migrations\Migration;
++use Illuminate\Support\Facades\DB;
++
++/**
++ * Requerimiento de Gerencia: renombrar el menú "COMPROMISO" / "COMMITMENT"
++ * a "CALIDAD" / "QUALITY".
++ *
++ * Las etiquetas del menú NO viven en resources/lang/*.php: el proyecto usa
++ * spatie/laravel-translation-loader (config/translation-loader.php), que
++ * lee las traducciones desde la tabla `language_lines`. Por eso el cambio
++ * de texto se hace aquí, con datos, y no editando un archivo de idioma.
++ *
++ * Se reutiliza la misma key ('web' / 'menu_compromiso_text') que ya usa
++ * resources/views/site/partials/header.blade.php tanto para el título del
++ * dropdown como para el primer ítem del submenú. Así no hace falta tocar
++ * las vistas ni las rutas: el submenú CALIDAD > Calidad / Certificaciones
++ * ya existe estructuralmente en el header, solo cambia el texto.
++ */
++return new class extends Migration
++{
++    private string $group = 'web';
++    private string $key = 'menu_compromiso_text';
++
++    private array $nuevoTexto = [
++        'es' => 'Calidad',
++        'en' => 'Quality',
++    ];
++
++    private array $textoAnterior = [
++        'es' => 'Compromiso',
++        'en' => 'Commitment',
++    ];
++
++    public function up(): void
++    {
++        $existe = DB::table('language_lines')
++            ->where('group', $this->group)
++            ->where('key', $this->key)
++            ->first();
++
++        if ($existe) {
++            DB::table('language_lines')
++                ->where('group', $this->group)
++                ->where('key', $this->key)
++                ->update([
++                    'text' => json_encode($this->nuevoTexto, JSON_UNESCAPED_UNICODE),
++                    'updated_at' => now(),
++                ]);
++        } else {
++            // Si la línea aún no existe en la tabla (p. ej. entorno nuevo),
++            // se crea directamente con el texto ya corregido.
++            DB::table('language_lines')->insert([
++                'group' => $this->group,
++                'key' => $this->key,
++                'text' => json_encode($this->nuevoTexto, JSON_UNESCAPED_UNICODE),
++                'created_at' => now(),
++                'updated_at' => now(),
++            ]);
++        }
++    }
++
++    public function down(): void
++    {
++        DB::table('language_lines')
++            ->where('group', $this->group)
++            ->where('key', $this->key)
++            ->update([
++                'text' => json_encode($this->textoAnterior, JSON_UNESCAPED_UNICODE),
++                'updated_at' => now(),
++            ]);
++    }
++};
+diff --git a/database/migrations/2026_07_23_000002_create_solicitudes_descarga_certificado_table.php b/database/migrations/2026_07_23_000002_create_solicitudes_descarga_certificado_table.php
+new file mode 100644
+index 0000000..5cc8ef1
+--- /dev/null
++++ b/database/migrations/2026_07_23_000002_create_solicitudes_descarga_certificado_table.php
+@@ -0,0 +1,46 @@
++<?php
++
++use Illuminate\Database\Migrations\Migration;
++use Illuminate\Database\Schema\Blueprint;
++use Illuminate\Support\Facades\Schema;
++
++/**
++ * Registro de solicitudes de descarga de certificados (punto 13 y 27 del
++ * requerimiento). Cada intento (exitoso o fallido en el envío del correo)
++ * queda registrado para auditoría y seguimiento por el área responsable.
++ */
++return new class extends Migration
++{
++    public function up(): void
++    {
++        Schema::create('solicitudes_descarga_certificado', function (Blueprint $table) {
++            $table->id();
++
++            $table->foreignId('certificacion_id')
++                  ->constrained('certificaciones')
++                  ->onDelete('cascade');
++
++            $table->string('nombre', 150);
++            $table->string('puesto', 150);
++            $table->string('empresa', 150);
++            $table->string('correo', 150);
++            $table->string('telefono', 30);
++            $table->string('contacto_gab', 150);
++            $table->text('uso');
++
++            $table->string('ip_origen', 45)->nullable()->comment('Solo si la política de privacidad lo permite');
++
++            $table->enum('estado_envio', ['enviado', 'error'])->default('enviado');
++            $table->text('error_detalle')->nullable();
++
++            $table->timestamps();
++
++            $table->index(['certificacion_id', 'created_at']);
++        });
++    }
++
++    public function down(): void
++    {
++        Schema::dropIfExists('solicitudes_descarga_certificado');
++    }
++};
+diff --git a/resources/views/mails/contacto.blade.php b/resources/views/mails/contacto.blade.php
+index 4626abf..9ff6730 100644
+--- a/resources/views/mails/contacto.blade.php
++++ b/resources/views/mails/contacto.blade.php
+@@ -56,7 +56,11 @@
+                                                                     </tr>
+                                                                     <tr>
+                                                                         <td style='border-collapse:collapse;color:#525252;padding-right:15px'><b style='color:#888;font-size:10px;text-transform:uppercase'>Correo electrónico</b></td>
+-                                                                        <td style='border-collapse:collapse;color:#525252'><a target='_blank' href='mailto:$email'>{{ $email }}</a></td>
++                                                                        <td style='border-collapse:collapse;color:#525252'><a target='_blank' href='mailto:{{ $email }}'>{{ $email }}</a></td>
++                                                                    </tr>
++                                                                    <tr>
++                                                                        <td style='border-collapse:collapse;color:#525252;padding-right:15px'><b style='color:#888;font-size:10px;text-transform:uppercase'>Área</b></td>
++                                                                        <td style='border-collapse:collapse;color:#525252'>{{ $areaLabel ?? '--' }}</td>
+                                                                     </tr>
+ 																	<tr>
+                                                                         <td style='border-collapse:collapse;color:#525252;padding-right:15px'><b style='color:#888;font-size:10px;text-transform:uppercase'>Empresa</b></td>
+@@ -74,6 +78,14 @@
+                                                                         <td style='border-collapse:collapse;color:#525252;padding-right:15px'><b style='color:#888;font-size:10px;text-transform:uppercase'>Comentarios</b></td>
+                                                                         <td style='border-collapse:collapse;color:#525252'>{{ $comentarios }}</td>
+                                                                     </tr>
++                                                                    <tr>
++                                                                        <td style='border-collapse:collapse;color:#525252;padding-right:15px'><b style='color:#888;font-size:10px;text-transform:uppercase'>Fecha</b></td>
++                                                                        <td style='border-collapse:collapse;color:#525252'>{{ now()->format('d/m/Y') }}</td>
++                                                                    </tr>
++                                                                    <tr>
++                                                                        <td style='border-collapse:collapse;color:#525252;padding-right:15px'><b style='color:#888;font-size:10px;text-transform:uppercase'>Hora</b></td>
++                                                                        <td style='border-collapse:collapse;color:#525252'>{{ now()->format('H:i') }}</td>
++                                                                    </tr>
+                                                                 </tbody>
+                                                             </table>
+                                                         </td>
+diff --git a/resources/views/mails/solicitud-descarga-certificado.blade.php b/resources/views/mails/solicitud-descarga-certificado.blade.php
+new file mode 100644
+index 0000000..bd6b1c5
+--- /dev/null
++++ b/resources/views/mails/solicitud-descarga-certificado.blade.php
+@@ -0,0 +1,48 @@
++<!DOCTYPE html>
++<html lang="es">
++<head>
++    <meta charset="UTF-8">
++    <title>Solicitud de descarga de certificado</title>
++</head>
++<body style="margin:0;padding:0;background:#f4f4f4;font-family:Arial, Helvetica, sans-serif;">
++    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f4;padding:24px 0;">
++        <tr>
++            <td align="center">
++                <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:6px;overflow:hidden;">
++                    <tr>
++                        <td style="background:#003CA6;padding:20px 30px;">
++                            <h1 style="color:#ffffff;font-size:18px;margin:0;">Solicitud de descarga de certificado</h1>
++                        </td>
++                    </tr>
++                    <tr>
++                        <td style="padding:24px 30px;">
++                            <p style="font-size:14px;color:#333;margin:0 0 16px;">
++                                <strong>Certificado solicitado:</strong><br>
++                                {{ $nombreCertificado }} (ID: {{ $idCertificado }})
++                            </p>
++
++                            <h3 style="font-size:14px;color:#003CA6;border-bottom:1px solid #eee;padding-bottom:6px;">Datos del solicitante</h3>
++                            <table role="presentation" width="100%" cellpadding="6" cellspacing="0" style="font-size:14px;color:#333;">
++                                <tr><td style="width:160px;"><strong>Nombre</strong></td><td>{{ $datos['nombre'] }}</td></tr>
++                                <tr><td><strong>Puesto</strong></td><td>{{ $datos['puesto'] }}</td></tr>
++                                <tr><td><strong>Empresa</strong></td><td>{{ $datos['empresa'] }}</td></tr>
++                                <tr><td><strong>Correo</strong></td><td>{{ $datos['correo'] }}</td></tr>
++                                <tr><td><strong>Teléfono</strong></td><td>{{ $datos['telefono'] }}</td></tr>
++                                <tr><td><strong>Contacto en GAB</strong></td><td>{{ $datos['contacto_gab'] }}</td></tr>
++                                <tr><td><strong>Uso</strong></td><td>{{ $datos['uso'] }}</td></tr>
++                                <tr><td><strong>Fecha</strong></td><td>{{ now()->format('d/m/Y') }}</td></tr>
++                                <tr><td><strong>Hora</strong></td><td>{{ now()->format('H:i') }}</td></tr>
++                            </table>
++
++                            <p style="font-size:12px;color:#777;margin-top:24px;">
++                                Este mensaje fue generado automáticamente desde el sitio web de Mr. Lucky.
++                                Por favor revise la solicitud y determine cómo entregar el documento al solicitante.
++                            </p>
++                        </td>
++                    </tr>
++                </table>
++            </td>
++        </tr>
++    </table>
++</body>
++</html>
+diff --git a/resources/views/site/pages/certificaciones.blade.php b/resources/views/site/pages/certificaciones.blade.php
+index 916e074..f321409 100644
+--- a/resources/views/site/pages/certificaciones.blade.php
++++ b/resources/views/site/pages/certificaciones.blade.php
+@@ -25,32 +25,32 @@
+             </h4>
+             <div class="row text-center align-items-center justify-content-center">
+                 <div class="col-6 col-md-3 col-lg-2 mb-3">
+-                    <a href="/site/certificaciones/ccof.pdf" target="_blank" rel="noopener">
++                    <a href="{{ route(App::currentLocale() == 'en' ? 'en.certificaciones.ver_general' : 'certificaciones.ver_general', 'ccof') }}" target="_blank" rel="noopener">
+                         <img src="/site/img/certificaciones/01.jpg" class="img-fluid" loading="lazy" alt="CCOF">
+                     </a>
+                 </div>
+                 <div class="col-6 col-md-3 col-lg-2 mb-3">
+-                    <a href="/site/certificaciones/c-tpat.pdf" target="_blank" rel="noopener">
++                    <a href="{{ route(App::currentLocale() == 'en' ? 'en.certificaciones.ver_general' : 'certificaciones.ver_general', 'c-tpat') }}" target="_blank" rel="noopener">
+                         <img src="/site/img/certificaciones/02.jpg" class="img-fluid" loading="lazy" alt="C-TPAT">
+                     </a>
+                 </div>
+                 <div class="col-6 col-md-3 col-lg-2 mb-3">
+-                    <a href="/site/certificaciones/sqf.pdf" target="_blank" rel="noopener">
++                    <a href="{{ route(App::currentLocale() == 'en' ? 'en.certificaciones.ver_general' : 'certificaciones.ver_general', 'sqf') }}" target="_blank" rel="noopener">
+                         <img src="/site/img/certificaciones/04.jpg" class="img-fluid" loading="lazy" alt="SQF">
+                     </a>
+                 </div>
+                 <div class="col-6 col-md-3 col-lg-2 mb-3">
+-                    <a href="/site/certificaciones/kosher.pdf" target="_blank" rel="noopener">
++                    <a href="{{ route(App::currentLocale() == 'en' ? 'en.certificaciones.ver_general' : 'certificaciones.ver_general', 'kosher') }}" target="_blank" rel="noopener">
+                         <img src="/site/img/certificaciones/03.jpg" class="img-fluid" loading="lazy" alt="Kosher">
+                     </a>
+                 </div>
+                 <div class="col-6 col-md-3 col-lg-2 mb-3">
+-                    <a href="/site/certificaciones/FTUSA_CRT.pdf" target="_blank" rel="noopener">
++                    <a href="{{ route(App::currentLocale() == 'en' ? 'en.certificaciones.ver_general' : 'certificaciones.ver_general', 'ftusa') }}" target="_blank" rel="noopener">
+                         <img src="/site/img/certificaciones/06.jpg" class="img-fluid" loading="lazy" alt="FTUSA">
+                     </a>
+                 </div>
+                 <div class="col-6 col-md-3 col-lg-2 mb-3">
+-                    <a href="/site/certificaciones/smeta.pdf" target="_blank" rel="noopener">
++                    <a href="{{ route(App::currentLocale() == 'en' ? 'en.certificaciones.ver_general' : 'certificaciones.ver_general', 'smeta') }}" target="_blank" rel="noopener">
+                         <img src="/site/img/certificaciones/05.jpg" class="img-fluid" loading="lazy" alt="SMETA">
+                     </a>
+                 </div>
+diff --git a/resources/views/site/pages/certificado-solicitud.blade.php b/resources/views/site/pages/certificado-solicitud.blade.php
+new file mode 100644
+index 0000000..2819eab
+--- /dev/null
++++ b/resources/views/site/pages/certificado-solicitud.blade.php
+@@ -0,0 +1,141 @@
++@section('title', App::currentLocale() == 'es' ? 'Solicitar descarga de certificado' : 'Request certificate download')
++@extends('site.layouts.master')
++@php
++    $active = 'certificaciones';
++    $esGeneral = isset($slugGeneral);
++    $nombreMostrado = $esGeneral ? $nombreCertificado : ($certificacion->rancho->nombre . ' - ' . $certificacion->tipoCertificacion->nombre);
++    $idOculto = $esGeneral ? $slugGeneral : $certificacion->id;
++
++    if ($esGeneral) {
++        $rutaEnvio = App::currentLocale() == 'en'
++            ? route('en.certificaciones.solicitar_descarga_general.enviar', $slugGeneral)
++            : route('certificaciones.solicitar_descarga_general.enviar', $slugGeneral);
++    } else {
++        $rutaEnvio = App::currentLocale() == 'en'
++            ? route('en.certificaciones.solicitar_descarga.enviar', $certificacion->id)
++            : route('certificaciones.solicitar_descarga.enviar', $certificacion->id);
++    }
++@endphp
++
++@section('page')
++
++<section class="padding bg-gris-claro">
++    <div class="container" style="max-width:720px;">
++
++        <div class="text-center mb-4">
++            <h1 class="azul-marino f600 h3">
++                {{ App::currentLocale() == 'es' ? 'Solicitar descarga de certificado' : 'Request certificate download' }}
++            </h1>
++            <p class="gris">
++                {{ App::currentLocale() == 'es' ? 'Certificado:' : 'Certificate:' }}
++                <strong>{{ $nombreMostrado }}</strong>
++            </p>
++        </div>
++
++        @if(session('certificado_solicitud_enviada'))
++            <div class="alert alert-success" role="alert" aria-live="polite">
++                <strong>{{ App::currentLocale() == 'es' ? 'Solicitud enviada correctamente.' : 'Request sent successfully.' }}</strong>
++                <p class="mb-0">
++                    {{ App::currentLocale() == 'es'
++                        ? 'Hemos recibido su solicitud de descarga. Nuestro equipo revisará la información proporcionada y dará seguimiento a su solicitud.'
++                        : 'We have received your download request. Our team will review the information provided and follow up.' }}
++                </p>
++            </div>
++        @endif
++
++        @if(session('certificado_error'))
++            <div class="alert alert-danger" role="alert" aria-live="assertive">
++                {{ App::currentLocale() == 'es'
++                    ? 'No fue posible enviar su solicitud en este momento. Por favor, inténtelo nuevamente más tarde.'
++                    : 'We were unable to send your request at this time. Please try again later.' }}
++            </div>
++        @endif
++
++        @if($errors->any())
++            <div class="alert alert-danger" role="alert" aria-live="assertive">
++                <ul class="mb-0 pl-3">
++                    @foreach($errors->all() as $error)
++                        <li>{{ $error }}</li>
++                    @endforeach
++                </ul>
++            </div>
++        @endif
++
++        <div class="bg-white shadow p-4 rounded">
++            <form method="POST" action="{{ $rutaEnvio }}" data-analytics-event-submit="certificate_request_submit" id="formSolicitudCertificado">
++                @csrf
++                {{-- Honeypot anti-spam: campo invisible para humanos.
++                     IMPORTANTE: debe ser type="hidden", no un input de texto
++                     posicionado fuera de pantalla con CSS. Los navegadores
++                     (Chrome, Firefox) SÍ autocompletan inputs de texto/visibles
++                     llamados "website" como parte del autofill de datos de
++                     contacto, aunque estén fuera de pantalla — eso disparaba
++                     el rechazo "The website field is prohibited" con usuarios
++                     reales. Un input type="hidden" nunca es autocompletado. --}}
++                <input type="hidden" name="website" value="">
++
++                <input type="hidden" name="certificado_id" value="{{ $idOculto }}">
++                <input type="hidden" name="certificado_nombre" value="{{ $nombreMostrado }}">
++
++                <div class="form-group">
++                    <label for="nombre">{{ App::currentLocale() == 'es' ? 'Nombre' : 'Name' }} *</label>
++                    <input type="text" id="nombre" name="nombre" class="form-control" value="{{ old('nombre') }}" required maxlength="150">
++                </div>
++
++                <div class="form-group">
++                    <label for="puesto">{{ App::currentLocale() == 'es' ? 'Puesto' : 'Job title' }} *</label>
++                    <input type="text" id="puesto" name="puesto" class="form-control" value="{{ old('puesto') }}" required maxlength="150">
++                </div>
++
++                <div class="form-group">
++                    <label for="empresa">{{ App::currentLocale() == 'es' ? 'Empresa' : 'Company' }} *</label>
++                    <input type="text" id="empresa" name="empresa" class="form-control" value="{{ old('empresa') }}" required maxlength="150">
++                </div>
++
++                <div class="form-group">
++                    <label for="correo">{{ App::currentLocale() == 'es' ? 'Correo electrónico' : 'Email' }} *</label>
++                    <input type="email" id="correo" name="correo" class="form-control" value="{{ old('correo') }}" required maxlength="150">
++                </div>
++
++                <div class="form-group">
++                    <label for="telefono">{{ App::currentLocale() == 'es' ? 'Teléfono' : 'Phone' }} *</label>
++                    <input type="tel" id="telefono" name="telefono" class="form-control" value="{{ old('telefono') }}" required maxlength="30">
++                </div>
++
++                <div class="form-group">
++                    <label for="contacto_gab">{{ App::currentLocale() == 'es' ? 'Contacto en GAB' : 'GAB contact' }} *</label>
++                    <input type="text" id="contacto_gab" name="contacto_gab" class="form-control" value="{{ old('contacto_gab') }}" required maxlength="150">
++                </div>
++
++                <div class="form-group">
++                    <label for="uso">
++                        {{ App::currentLocale() == 'es' ? 'Uso' : 'Purpose' }} *
++                        <small class="d-block gris">
++                            {{ App::currentLocale() == 'es'
++                                ? 'Describa brevemente el uso que dará al certificado.'
++                                : 'Briefly describe the intended use of the certificate.' }}
++                        </small>
++                    </label>
++                    <textarea id="uso" name="uso" class="form-control" rows="4" required maxlength="{{ config('certificaciones.uso_max_length', 500) }}">{{ old('uso') }}</textarea>
++                </div>
++
++                <button type="submit" class="btn btn-block cert-btn-descarga" style="max-width:100%;" id="btnEnviarSolicitud">
++                    {{ App::currentLocale() == 'es' ? 'Enviar solicitud' : 'Submit request' }}
++                </button>
++            </form>
++        </div>
++    </div>
++</section>
++
++@endsection
++
++@section('customJS')
++<script>
++    // Evitar doble envío y mostrar estado de carga (UX punto 35).
++    document.getElementById('formSolicitudCertificado')?.addEventListener('submit', function () {
++        var btn = document.getElementById('btnEnviarSolicitud');
++        btn.disabled = true;
++        btn.innerText = '{{ App::currentLocale() == "es" ? "Enviando..." : "Sending..." }}';
++    });
++</script>
++@endsection
+diff --git a/resources/views/site/pages/compromiso.blade.php b/resources/views/site/pages/compromiso.blade.php
+index 4434618..bc037ab 100644
+--- a/resources/views/site/pages/compromiso.blade.php
++++ b/resources/views/site/pages/compromiso.blade.php
+@@ -55,32 +55,32 @@ $active = 'compromiso';
+                         {{-- ── Logos de certificaciones existentes (sin cambios) ── --}}
+                         <div class="row text-center">
+                             <div class="col-7 col-md">
+-                                <a href="/site/certificaciones/ccof.pdf" target="_blank">
++                                <a href="{{ route(App::currentLocale() == 'en' ? 'en.certificaciones.ver_general' : 'certificaciones.ver_general', 'ccof') }}" target="_blank">
+                                     <img src="/site/img/certificaciones/01.jpg" class="img-fluid" loading="lazy" alt="CCOF">
+                                 </a>
+                             </div>
+                             <div class="col-7 col-md">
+-                                <a href="/site/certificaciones/c-tpat.pdf" target="_blank">
++                                <a href="{{ route(App::currentLocale() == 'en' ? 'en.certificaciones.ver_general' : 'certificaciones.ver_general', 'c-tpat') }}" target="_blank">
+                                     <img src="/site/img/certificaciones/02.jpg" class="img-fluid" loading="lazy" alt="C-TPAT">
+                                 </a>
+                             </div>
+                             <div class="col-7 col-md">
+-                                <a href="/site/certificaciones/sqf.pdf" target="_blank">
++                                <a href="{{ route(App::currentLocale() == 'en' ? 'en.certificaciones.ver_general' : 'certificaciones.ver_general', 'sqf') }}" target="_blank">
+                                     <img src="/site/img/certificaciones/04.jpg" class="img-fluid" loading="lazy" alt="SQF">
+                                 </a>
+                             </div>
+                             <div class="col-7 col-md">
+-                                <a href="/site/certificaciones/kosher.pdf" target="_blank">
++                                <a href="{{ route(App::currentLocale() == 'en' ? 'en.certificaciones.ver_general' : 'certificaciones.ver_general', 'kosher') }}" target="_blank">
+                                     <img src="/site/img/certificaciones/03.jpg" class="img-fluid" loading="lazy" alt="Kosher">
+                                 </a>
+                             </div>
+                             <div class="col-7 col-md">
+-                                <a href="/site/certificaciones/FTUSA_CRT.pdf" target="_blank">
++                                <a href="{{ route(App::currentLocale() == 'en' ? 'en.certificaciones.ver_general' : 'certificaciones.ver_general', 'ftusa') }}" target="_blank">
+                                     <img src="/site/img/certificaciones/06.jpg" class="img-fluid" loading="lazy" alt="FTUSA">
+                                 </a>
+                             </div>
+                             <div class="col-7 col-md">
+-                                <a href="/site/certificaciones/smeta.pdf" target="_blank">
++                                <a href="{{ route(App::currentLocale() == 'en' ? 'en.certificaciones.ver_general' : 'certificaciones.ver_general', 'smeta') }}" target="_blank">
+                                     <img src="/site/img/certificaciones/05.jpg" class="img-fluid" loading="lazy" alt="SMETA">
+                                 </a>
+                             </div>
+@@ -736,6 +736,39 @@ $active = 'compromiso';
+         background: #757575;
+     }
+ 
++    .cert-acciones {
++        margin-top: auto;
++    }
++
++    .cert-acciones .cert-btn-descarga,
++    .cert-acciones .cert-btn-solicitar {
++        margin-top: 0;
++        flex: 1 1 0;
++        min-height: 44px; /* objetivo táctil accesible */
++    }
++
++    .cert-btn-solicitar {
++        display: flex;
++        align-items: center;
++        justify-content: center;
++        width: 100%;
++        padding: 9px;
++        background: #fff;
++        color: #003CA6 !important;
++        border: 2px solid #003CA6;
++        border-radius: 7px;
++        font-size: 12px;
++        font-weight: 600;
++        text-decoration: none !important;
++        transition: background .2s, color .2s, transform .15s;
++    }
++
++    .cert-btn-solicitar:hover {
++        background: #003CA6;
++        color: #fff !important;
++        transform: translateY(-1px);
++    }
++
+     .cert-sin-pdf {
+         display: block;
+         text-align: center;
+diff --git a/resources/views/site/pages/contacto.blade.php b/resources/views/site/pages/contacto.blade.php
+index 0cd2887..d04f7cf 100644
+--- a/resources/views/site/pages/contacto.blade.php
++++ b/resources/views/site/pages/contacto.blade.php
+@@ -19,48 +19,80 @@ $active = 'contacto';
+                     {!! trans('contacto.form_text') !!}
+                 </p>
+ 
++                @if(request('send') == '1')
++                    <div class="alert alert-success" role="alert" aria-live="polite">
++                        {{ App::currentLocale() == 'es'
++                            ? '¡Gracias! Tu mensaje fue enviado correctamente.'
++                            : 'Thank you! Your message was sent successfully.' }}
++                    </div>
++                @endif
++
++                @if(session('contacto_error'))
++                    <div class="alert alert-danger" role="alert" aria-live="assertive">
++                        {{ App::currentLocale() == 'es'
++                            ? 'No fue posible enviar tu mensaje en este momento. Por favor, inténtalo nuevamente más tarde.'
++                            : 'We were unable to send your message at this time. Please try again later.' }}
++                    </div>
++                @endif
++
++                @if($errors->any())
++                    <div class="alert alert-danger" role="alert" aria-live="assertive">
++                        <ul class="mb-0 pl-3">
++                            @foreach($errors->all() as $error)
++                                <li>{{ $error }}</li>
++                            @endforeach
++                        </ul>
++                    </div>
++                @endif
++
+                 <form action="{{ route(App::currentLocale().'.contacto_enviar') }}" method="post" data-toggle="validator" data-disable="false" data-focus="false">
+                     {{ csrf_field() }}
+                     <input type="hidden" name="website" value="" />
+                     <div class="form-group">
++                        {{--
++                            SEGURIDAD (requerimiento punto 18/24): el valor de cada <option>
++                            ya NO es una dirección de correo. Es una clave interna
++                            ("sistemas", "ventas_nacional", etc.) que el backend resuelve
++                            contra config/contacto.php. Así el usuario nunca controla el
++                            destinatario real del mensaje.
++                        --}}
+                         <select name="area" class="form-control" data-error="{!! trans('contacto.area_error') !!}" required>
+                             <option value="">{!! trans('contacto.area_label') !!}</option>
+-                            <option value="rosa.rodriguez@mrlucky.com.mx">{!! trans('contacto.capitalhumano_label') !!}</option>
+-                            {{-- <option value="lescobar@brandhouse.com.mx">Capital Humano 2</option> --}}
+-                            <option value="mrhernandez@mrlucky.com.mx">{!! trans('contacto.calidad') !!}</option>
+-                            <option value="comprasmp@mrlucky.com.mx,comprasmateriales@mrlucky.com.mx">{!! trans('contacto.proveedores') !!}</option>
+-                            <option value="">{!! trans('contacto.mantenimiento') !!}</option>
+-                            <option value="mercadotecnia@mrlucky.com.mx">{!! trans('contacto.mercadotecnia') !!}</option>
+-                            <option value="msamano@mrluccky.com.mx">{!! trans('contacto.capitalhumano_label') !!}</option>
+-                            <option value="sistemas@mrlucky.com.mx">{!! trans('contacto.sistemas') !!}</option>
+-                            <option value="orders@mrlucky.com.mx">{!! trans('contacto.ventasexportacion') !!}</option>
+-                            <option value="">{!! trans('contacto.ventasnacional') !!}</option>
++                            <option value="capital_humano" {{ old('area') == 'capital_humano' ? 'selected' : '' }}>{!! trans('contacto.capitalhumano_label') !!}</option>
++                            <option value="calidad" {{ old('area') == 'calidad' ? 'selected' : '' }}>{!! trans('contacto.calidad') !!}</option>
++                            <option value="proveedores" {{ old('area') == 'proveedores' ? 'selected' : '' }}>{!! trans('contacto.proveedores') !!}</option>
++                            <option value="mantenimiento" {{ old('area') == 'mantenimiento' ? 'selected' : '' }}>{!! trans('contacto.mantenimiento') !!}</option>
++                            <option value="mercadotecnia" {{ old('area') == 'mercadotecnia' ? 'selected' : '' }}>{!! trans('contacto.mercadotecnia') !!}</option>
++                            <option value="recursos_humanos_2" {{ old('area') == 'recursos_humanos_2' ? 'selected' : '' }}>{!! trans('contacto.capitalhumano_label') !!}</option>
++                            <option value="sistemas" {{ old('area') == 'sistemas' ? 'selected' : '' }}>{!! trans('contacto.sistemas') !!}</option>
++                            <option value="ventas_exportacion" {{ old('area') == 'ventas_exportacion' ? 'selected' : '' }}>{!! trans('contacto.ventasexportacion') !!}</option>
++                            <option value="ventas_nacional" {{ old('area') == 'ventas_nacional' ? 'selected' : '' }}>{!! trans('contacto.ventasnacional') !!}</option>
+                         </select>
+                         <small class="help-block with-errors"></small>
+                         {{-- Copia a: ricardo.cortes@mrlucky.com.mxmusabiaga@mrlucky.com.mxadrian.ortega@mrlucky.com.mx --}}
+                     </div>
+                     <div class="form-group">
+-                        <input type="text" name="nombre" class="form-control" placeholder="{!! trans('contacto.nombre_label') !!}" data-error="{!! trans('contacto.nombre_error') !!}" required>
++                        <input type="text" name="nombre" class="form-control" value="{{ old('nombre') }}" placeholder="{!! trans('contacto.nombre_label') !!}" data-error="{!! trans('contacto.nombre_error') !!}" required>
+                         <small class="help-block with-errors"></small>
+                     </div>
+                     <div class="form-group">
+-                        <input type="text" name="empresa" class="form-control" placeholder="{!! trans('contacto.empresa_label') !!}" data-error="{!! trans('contacto.empresa_error') !!}" required>
++                        <input type="text" name="empresa" class="form-control" value="{{ old('empresa') }}" placeholder="{!! trans('contacto.empresa_label') !!}" data-error="{!! trans('contacto.empresa_error') !!}" required>
+                         <small class="help-block with-errors"></small>
+                     </div>
+                     <div class="form-group">
+-                        <input type="text" name="telefono" class="form-control" placeholder="{!! trans('contacto.telefono_label') !!}">
++                        <input type="text" name="telefono" class="form-control" value="{{ old('telefono') }}" placeholder="{!! trans('contacto.telefono_label') !!}">
+                         <small class="help-block with-errors"></small>
+                     </div>
+                     <div class="form-group">
+-                        <input type="email" name="email" class="form-control" placeholder="{!! trans('contacto.email_label') !!}" data-error="{!! trans('contacto.correo_error') !!}" data-required-error="{!! trans('contacto.correo_error2') !!}" required>
++                        <input type="email" name="email" class="form-control" value="{{ old('email') }}" placeholder="{!! trans('contacto.email_label') !!}" data-error="{!! trans('contacto.correo_error') !!}" data-required-error="{!! trans('contacto.correo_error2') !!}" required>
+                         <small class="help-block with-errors"></small>
+                     </div>
+                     <div class="form-group">
+-                        <input type="text" name="ciudad" class="form-control" placeholder="{!! trans('contacto.ciudad_label') !!}" data-error="{!! trans('contacto.ciudad_error') !!}" required>
++                        <input type="text" name="ciudad" class="form-control" value="{{ old('ciudad') }}" placeholder="{!! trans('contacto.ciudad_label') !!}" data-error="{!! trans('contacto.ciudad_error') !!}" required>
+                         <small class="help-block with-errors"></small>
+                     </div>
+                     <div class="form-group">
+-                        <textarea name="comentarios" rows="5" class="form-control" placeholder="{!! trans('contacto.comentarios_label') !!}" data-error="{!! trans('contacto.comentario_error') !!}" required></textarea>
++                        <textarea name="comentarios" rows="5" class="form-control" placeholder="{!! trans('contacto.comentarios_label') !!}" data-error="{!! trans('contacto.comentario_error') !!}" required>{{ old('comentarios') }}</textarea>
+                         <small class="help-block with-errors"></small>
+                     </div>
+                     <div class="form-group">
+diff --git a/resources/views/site/pages/inicio.blade.php b/resources/views/site/pages/inicio.blade.php
+index a7cedd6..757642e 100644
+--- a/resources/views/site/pages/inicio.blade.php
++++ b/resources/views/site/pages/inicio.blade.php
+@@ -213,27 +213,27 @@
+ 			<div class="my-4 m700 mx-auto">
+ 				<div class="row text-center">
+ 					<div class="col-7 col-md">
+-						<a href="/site/certificaciones/ccof.pdf" target="_blank">
++						<a href="{{ route(App::currentLocale() == 'en' ? 'en.certificaciones.ver_general' : 'certificaciones.ver_general', 'ccof') }}" target="_blank">
+ 							<img src="/site/img/certificaciones/01.jpg" class="img-fluid" loading="lazy" alt="">
+ 						</a>
+ 					</div>
+ 					<div class="col-7 col-md">
+-						<a href="/site/certificaciones/c-tpat.pdf" target="_blank">
++						<a href="{{ route(App::currentLocale() == 'en' ? 'en.certificaciones.ver_general' : 'certificaciones.ver_general', 'c-tpat') }}" target="_blank">
+ 							<img src="/site/img/certificaciones/02.jpg" class="img-fluid" loading="lazy" alt="">
+ 						</a>
+ 					</div>
+ 					<div class="col-7 col-md">
+-						<a href="/site/certificaciones/kosher.pdf" target="_blank">
++						<a href="{{ route(App::currentLocale() == 'en' ? 'en.certificaciones.ver_general' : 'certificaciones.ver_general', 'kosher') }}" target="_blank">
+ 							<img src="/site/img/certificaciones/03.jpg" class="img-fluid" loading="lazy" alt="">
+ 						</a>
+ 					</div>
+ 					<div class="col-7 col-md">
+-						<a href="/site/certificaciones/sqf.pdf" target="_blank">
++						<a href="{{ route(App::currentLocale() == 'en' ? 'en.certificaciones.ver_general' : 'certificaciones.ver_general', 'sqf') }}" target="_blank">
+ 							<img src="/site/img/certificaciones/04.jpg" class="img-fluid" loading="lazy" alt="">
+ 						</a>
+ 					</div>
+ 					<div class="col-7 col-md">
+-						<a href="/site/certificaciones/smeta.pdf" target="_blank">
++						<a href="{{ route(App::currentLocale() == 'en' ? 'en.certificaciones.ver_general' : 'certificaciones.ver_general', 'smeta') }}" target="_blank">
+ 							<img src="/site/img/certificaciones/05.jpg" class="img-fluid" loading="lazy" alt="">
+ 						</a>
+ 					</div>
+diff --git a/resources/views/site/partials/certificados-mosaico.blade.php b/resources/views/site/partials/certificados-mosaico.blade.php
+index 863ef86..3f2f3cf 100644
+--- a/resources/views/site/partials/certificados-mosaico.blade.php
++++ b/resources/views/site/partials/certificados-mosaico.blade.php
+@@ -186,18 +186,33 @@
+ 
+                         </div>{{-- /.cert-detalles --}}
+ 
+-                        {{-- Botón de descarga PDF --}}
++                        {{-- Consultar el certificado (visor inline) + solicitar descarga.
++                             Requerimiento de Gerencia: los certificados se pueden consultar
++                             libremente, pero NO existe un botón de descarga directa. Para
++                             obtener una copia, el usuario debe llenar un formulario. --}}
+                         @if($cert->pdf_url)
+-                            <a href="{{ $cert->pdf_url }}"
+-                               class="cert-btn-descarga {{ !$vigente ? 'cert-btn-descarga--vencido' : '' }}"
+-                               target="_blank"
+-                               rel="noopener noreferrer"
+-                               aria-label="{{ App::currentLocale() == 'es'
+-                                    ? 'Descargar certificado PDF de ' . $rancho->nombre
+-                                    : 'Download PDF certificate for ' . $rancho->nombre }}">
+-                                <i class="fa fa-file-pdf-o mr-1" aria-hidden="true"></i>
+-                                {{ App::currentLocale() == 'es' ? 'Descargar Certificado' : 'Download Certificate' }}
+-                            </a>
++                            <div class="cert-acciones d-flex flex-column flex-sm-row" style="gap:.5rem;">
++                                <a href="{{ $cert->pdf_url }}"
++                                   class="cert-btn-descarga {{ !$vigente ? 'cert-btn-descarga--vencido' : '' }}"
++                                   target="_blank"
++                                   rel="noopener noreferrer"
++                                   data-analytics-event="certificate_view"
++                                   aria-label="{{ App::currentLocale() == 'es'
++                                        ? 'Consultar certificado PDF de ' . $rancho->nombre
++                                        : 'View PDF certificate for ' . $rancho->nombre }}">
++                                    <i class="fa fa-file-pdf-o mr-1" aria-hidden="true"></i>
++                                    {{ App::currentLocale() == 'es' ? 'Ver Certificado' : 'View Certificate' }}
++                                </a>
++                                <a href="{{ $cert->solicitud_descarga_url }}"
++                                   class="cert-btn-solicitar"
++                                   data-analytics-event="certificate_request_open"
++                                   aria-label="{{ App::currentLocale() == 'es'
++                                        ? 'Solicitar descarga del certificado de ' . $rancho->nombre
++                                        : 'Request download of the certificate for ' . $rancho->nombre }}">
++                                    <i class="fa fa-download mr-1" aria-hidden="true"></i>
++                                    {{ App::currentLocale() == 'es' ? 'Solicitar Descarga' : 'Request Download' }}
++                                </a>
++                            </div>
+                         @else
+                             <span class="cert-sin-pdf small gris">
+                                 <i class="fa fa-file-o mr-1" aria-hidden="true"></i>
+diff --git a/routes/web.php b/routes/web.php
+index 941de99..8af9010 100644
+--- a/routes/web.php
++++ b/routes/web.php
+@@ -66,8 +66,38 @@ Route::get('/en/commitment', [SiteController::class, 'compromiso'])->name('en.co
+ Route::get('/certificaciones', [SiteController::class, 'certificaciones'])->name('es.certificaciones');
+ Route::get('/en/certifications', [SiteController::class, 'certificaciones'])->name('en.certificaciones');
+ 
+-// Descarga de PDF (protegida)
+-Route::get('/certificaciones/descargar/{certificacion}', [CertificacionController::class, 'descargar'])->name('certificaciones.descargar');
++// Visor protegido del PDF (solo lectura en línea, "inline"; nunca fuerza descarga
++// y nunca expone una ruta pública directa al archivo original en /storage o /public).
++Route::get('/certificaciones/ver/{certificacion}', [CertificacionController::class, 'ver'])->name('certificaciones.ver');
++Route::get('/en/certifications/view/{certificacion}', [CertificacionController::class, 'ver'])->name('en.certificaciones.ver');
++
++// Solicitud de descarga: el usuario ya NO puede descargar el PDF directamente.
++// Debe llenar un formulario; la solicitud se envía por correo al área
++// responsable, que decide cómo entregar el documento (ver punto 12 del requerimiento).
++Route::get('/certificaciones/solicitar-descarga/{certificacion}', [CertificacionController::class, 'solicitarDescarga'])->name('certificaciones.solicitar_descarga');
++Route::get('/en/certifications/request-download/{certificacion}', [CertificacionController::class, 'solicitarDescarga'])->name('en.certificaciones.solicitar_descarga');
++
++Route::post('/certificaciones/solicitar-descarga/{certificacion}', [CertificacionController::class, 'enviarSolicitudDescarga'])
++    ->middleware('throttle:5,1')
++    ->name('certificaciones.solicitar_descarga.enviar');
++Route::post('/en/certifications/request-download/{certificacion}', [CertificacionController::class, 'enviarSolicitudDescarga'])
++    ->middleware('throttle:5,1')
++    ->name('en.certificaciones.solicitar_descarga.enviar');
++
++// Catálogo general de certificaciones (CCOF, C-TPAT, SQF, Kosher, FTUSA, SMETA)
++// — antes servido como PDF público descargable, ahora solo consulta + solicitud.
++Route::get('/certificaciones/consultar/{slug}', [CertificacionController::class, 'verGeneral'])->name('certificaciones.ver_general');
++Route::get('/en/certifications/view-general/{slug}', [CertificacionController::class, 'verGeneral'])->name('en.certificaciones.ver_general');
++
++Route::get('/certificaciones/solicitar-descarga-general/{slug}', [CertificacionController::class, 'solicitarDescargaGeneral'])->name('certificaciones.solicitar_descarga_general');
++Route::get('/en/certifications/request-download-general/{slug}', [CertificacionController::class, 'solicitarDescargaGeneral'])->name('en.certificaciones.solicitar_descarga_general');
++
++Route::post('/certificaciones/solicitar-descarga-general/{slug}', [CertificacionController::class, 'enviarSolicitudDescargaGeneral'])
++    ->middleware('throttle:5,1')
++    ->name('certificaciones.solicitar_descarga_general.enviar');
++Route::post('/en/certifications/request-download-general/{slug}', [CertificacionController::class, 'enviarSolicitudDescargaGeneral'])
++    ->middleware('throttle:5,1')
++    ->name('en.certificaciones.solicitar_descarga_general.enviar');
+ 
+ // Productos
+ Route::get('/productos', [SiteController::class, 'productos'])->name('es.productos');
+@@ -100,8 +130,8 @@ Route::get('/en/group-u', [SiteController::class, 'grupoU'])->name('en.grupo_u')
+ // Contacto
+ Route::get('/contacto', [SiteController::class, 'contacto'])->name('es.contacto');
+ Route::get('/en/contact-us', [SiteController::class, 'contacto'])->name('en.contacto');
+-Route::post('/contacto', [SiteController::class, 'enviarContacto'])->name('es.contacto_enviar');
+-Route::post('/en/contact-us', [SiteController::class, 'enviarContacto'])->name('en.contacto_enviar');
++Route::post('/contacto', [SiteController::class, 'enviarContacto'])->middleware('throttle:5,1')->name('es.contacto_enviar');
++Route::post('/en/contact-us', [SiteController::class, 'enviarContacto'])->middleware('throttle:5,1')->name('en.contacto_enviar');
+ 
+ // Vacantes
+ Route::get('/vacantes', [SiteController::class, 'vacantes'])->name('es.vacantes');
+diff --git a/public/site/certificaciones/FTUSA_CRT.pdf b/storage/app/private/certificaciones-generales/FTUSA_CRT.pdf
+similarity index 100%
+rename from public/site/certificaciones/FTUSA_CRT.pdf
+rename to storage/app/private/certificaciones-generales/FTUSA_CRT.pdf
+diff --git a/public/site/certificaciones/c-tpat.pdf b/storage/app/private/certificaciones-generales/c-tpat.pdf
+similarity index 100%
+rename from public/site/certificaciones/c-tpat.pdf
+rename to storage/app/private/certificaciones-generales/c-tpat.pdf
+diff --git a/public/site/certificaciones/ccof.pdf b/storage/app/private/certificaciones-generales/ccof.pdf
+similarity index 100%
+rename from public/site/certificaciones/ccof.pdf
+rename to storage/app/private/certificaciones-generales/ccof.pdf
+diff --git a/public/site/certificaciones/kosher.pdf b/storage/app/private/certificaciones-generales/kosher.pdf
+similarity index 100%
+rename from public/site/certificaciones/kosher.pdf
+rename to storage/app/private/certificaciones-generales/kosher.pdf
+diff --git a/public/site/certificaciones/smeta.pdf b/storage/app/private/certificaciones-generales/smeta.pdf
+similarity index 100%
+rename from public/site/certificaciones/smeta.pdf
+rename to storage/app/private/certificaciones-generales/smeta.pdf
+diff --git a/public/site/certificaciones/sqf.pdf b/storage/app/private/certificaciones-generales/sqf.pdf
+similarity index 100%
+rename from public/site/certificaciones/sqf.pdf
+rename to storage/app/private/certificaciones-generales/sqf.pdf
