@@ -56,7 +56,11 @@
                                                                     </tr>
                                                                     <tr>
                                                                         <td style='border-collapse:collapse;color:#525252;padding-right:15px'><b style='color:#888;font-size:10px;text-transform:uppercase'>Correo electrónico</b></td>
-                                                                        <td style='border-collapse:collapse;color:#525252'><a target='_blank' href='mailto:$email'>{{ $email }}</a></td>
+                                                                        <td style='border-collapse:collapse;color:#525252'><a target='_blank' href='mailto:{{ $email }}'>{{ $email }}</a></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td style='border-collapse:collapse;color:#525252;padding-right:15px'><b style='color:#888;font-size:10px;text-transform:uppercase'>Área</b></td>
+                                                                        <td style='border-collapse:collapse;color:#525252'>{{ $areaLabel ?? '--' }}</td>
                                                                     </tr>
 																	<tr>
                                                                         <td style='border-collapse:collapse;color:#525252;padding-right:15px'><b style='color:#888;font-size:10px;text-transform:uppercase'>Empresa</b></td>
@@ -73,6 +77,14 @@
                                                                     <tr>
                                                                         <td style='border-collapse:collapse;color:#525252;padding-right:15px'><b style='color:#888;font-size:10px;text-transform:uppercase'>Comentarios</b></td>
                                                                         <td style='border-collapse:collapse;color:#525252'>{{ $comentarios }}</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td style='border-collapse:collapse;color:#525252;padding-right:15px'><b style='color:#888;font-size:10px;text-transform:uppercase'>Fecha</b></td>
+                                                                        <td style='border-collapse:collapse;color:#525252'>{{ now()->format('d/m/Y') }}</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td style='border-collapse:collapse;color:#525252;padding-right:15px'><b style='color:#888;font-size:10px;text-transform:uppercase'>Hora</b></td>
+                                                                        <td style='border-collapse:collapse;color:#525252'>{{ now()->format('H:i') }}</td>
                                                                     </tr>
                                                                 </tbody>
                                                             </table>

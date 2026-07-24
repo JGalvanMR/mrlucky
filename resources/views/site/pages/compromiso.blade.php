@@ -55,32 +55,32 @@ $active = 'compromiso';
                         {{-- ── Logos de certificaciones existentes (sin cambios) ── --}}
                         <div class="row text-center">
                             <div class="col-7 col-md">
-                                <a href="/site/certificaciones/ccof.pdf" target="_blank">
+                                <a href="{{ route(App::currentLocale() == 'en' ? 'en.certificaciones.ver_general' : 'certificaciones.ver_general', 'ccof') }}" target="_blank">
                                     <img src="/site/img/certificaciones/01.jpg" class="img-fluid" loading="lazy" alt="CCOF">
                                 </a>
                             </div>
                             <div class="col-7 col-md">
-                                <a href="/site/certificaciones/c-tpat.pdf" target="_blank">
+                                <a href="{{ route(App::currentLocale() == 'en' ? 'en.certificaciones.ver_general' : 'certificaciones.ver_general', 'c-tpat') }}" target="_blank">
                                     <img src="/site/img/certificaciones/02.jpg" class="img-fluid" loading="lazy" alt="C-TPAT">
                                 </a>
                             </div>
                             <div class="col-7 col-md">
-                                <a href="/site/certificaciones/sqf.pdf" target="_blank">
+                                <a href="{{ route(App::currentLocale() == 'en' ? 'en.certificaciones.ver_general' : 'certificaciones.ver_general', 'sqf') }}" target="_blank">
                                     <img src="/site/img/certificaciones/04.jpg" class="img-fluid" loading="lazy" alt="SQF">
                                 </a>
                             </div>
                             <div class="col-7 col-md">
-                                <a href="/site/certificaciones/kosher.pdf" target="_blank">
+                                <a href="{{ route(App::currentLocale() == 'en' ? 'en.certificaciones.ver_general' : 'certificaciones.ver_general', 'kosher') }}" target="_blank">
                                     <img src="/site/img/certificaciones/03.jpg" class="img-fluid" loading="lazy" alt="Kosher">
                                 </a>
                             </div>
                             <div class="col-7 col-md">
-                                <a href="/site/certificaciones/FTUSA_CRT.pdf" target="_blank">
+                                <a href="{{ route(App::currentLocale() == 'en' ? 'en.certificaciones.ver_general' : 'certificaciones.ver_general', 'ftusa') }}" target="_blank">
                                     <img src="/site/img/certificaciones/06.jpg" class="img-fluid" loading="lazy" alt="FTUSA">
                                 </a>
                             </div>
                             <div class="col-7 col-md">
-                                <a href="/site/certificaciones/smeta.pdf" target="_blank">
+                                <a href="{{ route(App::currentLocale() == 'en' ? 'en.certificaciones.ver_general' : 'certificaciones.ver_general', 'smeta') }}" target="_blank">
                                     <img src="/site/img/certificaciones/05.jpg" class="img-fluid" loading="lazy" alt="SMETA">
                                 </a>
                             </div>
@@ -734,6 +734,39 @@ $active = 'compromiso';
 
     .cert-btn-descarga--vencido:hover {
         background: #757575;
+    }
+
+    .cert-acciones {
+        margin-top: auto;
+    }
+
+    .cert-acciones .cert-btn-descarga,
+    .cert-acciones .cert-btn-solicitar {
+        margin-top: 0;
+        flex: 1 1 0;
+        min-height: 44px; /* objetivo táctil accesible */
+    }
+
+    .cert-btn-solicitar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        padding: 9px;
+        background: #fff;
+        color: #003CA6 !important;
+        border: 2px solid #003CA6;
+        border-radius: 7px;
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none !important;
+        transition: background .2s, color .2s, transform .15s;
+    }
+
+    .cert-btn-solicitar:hover {
+        background: #003CA6;
+        color: #fff !important;
+        transform: translateY(-1px);
     }
 
     .cert-sin-pdf {

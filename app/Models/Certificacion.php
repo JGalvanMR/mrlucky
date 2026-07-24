@@ -10,7 +10,11 @@ class Certificacion extends Model
 {
     use SoftDeletes;
 
-    protected $table = 'certificacion';
+    // BUGFIX: la migración crea la tabla en plural ('certificaciones'),
+    // pero el modelo apuntaba a 'certificacion' (singular). Esto rompía
+    // toda consulta sobre certificados. Se corrige para que coincida con
+    // database/migrations/2024_01_01_000003_create_certificaciones_table.php
+    protected $table = 'certificaciones';
     protected $fillable = [
         'rancho_id',
         'tipo_certificacion_id',
@@ -118,7 +122,7 @@ class Certificacion extends Model
     }
 
     /**
-     * URL de descarga del PDF.
+     * URL para CONSULTAR el PDF en el visor (inline, sin descargar).
      *
      * SIEMPRE apunta al controlador — nunca a una ruta pública directa.
      * El controlador valida visible_publico antes de servir el archivo.
@@ -126,9 +130,30 @@ class Certificacion extends Model
     public function getPdfUrlAttribute(): ?string
     {
         if ($this->pdf_path) {
-            return route('certificaciones.descargar', $this->id);
+            $routeName = \Illuminate\Support\Facades\App::currentLocale() === 'en'
+                ? 'en.certificaciones.ver'
+                : 'certificaciones.ver';
+
+            return route($routeName, $this->id);
         }
 
         return null;
+    }
+
+    /**
+     * URL para abrir el formulario de "Solicitar descarga" de este certificado.
+     * Ya NO existe una ruta pública que entregue el PDF directamente.
+     */
+    public function getSolicitudDescargaUrlAttribute(): ?string
+    {
+        if (!$this->pdf_path) {
+            return null;
+        }
+
+        $routeName = \Illuminate\Support\Facades\App::currentLocale() === 'en'
+            ? 'en.certificaciones.solicitar_descarga'
+            : 'certificaciones.solicitar_descarga';
+
+        return route($routeName, $this->id);
     }
 }

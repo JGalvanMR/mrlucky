@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\App;
 
 use App\Models\Idioma;
@@ -465,7 +466,7 @@ class SiteController extends Controller
     }
 
     /*---------- Enviar Contacto ----------*/
-    public function enviarContacto(Request $request)
+    public function enviarContacto(\App\Http\Requests\ContactoRequest $request)
     {
         if (!empty($request->input('website'))) {
             abort(400, 'Bot detectado (honeypot).');
@@ -473,25 +474,50 @@ class SiteController extends Controller
 
         $token = $request->input('g-recaptcha-response');
         if (empty($token)) {
-            return redirect()->back()->withErrors(['captcha' => 'Debes completar el captcha']);
+            return redirect()->back()->withInput()->withErrors(['captcha' => 'Debes completar el captcha']);
         }
 
         $verificado = $this->verificarToken($token, '6LezXjArAAAAAFONZGhY728H82z4DzsQ5AEpMHoS');
 
-        if ($verificado) {
-            $data = $request->all();
-            $enviarA = explode(',', $data['area']);
-
-            Mail::send('mails.contacto', $data, function ($m) use ($data, $enviarA) {
-                $m->from($data['email'], 'Web Mr Lucky');
-                $m->to($enviarA);
-                $m->subject('Contacto web');
-            });
-
-            return redirect(route(App::currentLocale() . '.inicio') . '?send=1');
+        if (!$verificado) {
+            return redirect()->back()->withInput()->withErrors(['captcha' => 'No se pudo verificar el captcha, inténtalo de nuevo.']);
         }
 
-        return redirect(route(App::currentLocale() . '.inicio'));
+        $data = $request->validated();
+        unset($data['website']);
+
+        // SEGURIDAD: el destinatario NUNCA se toma del valor enviado por el
+        // usuario. Se resuelve la clave de área ("sistemas", etc.) contra
+        // config/contacto.php, que centraliza todas las direcciones reales.
+        $areaKey = $data['area'];
+        $areaEmails = config("contacto.areas.$areaKey");
+        $areaLabel = trans(config("contacto.area_labels.$areaKey", 'contacto.area_label'));
+
+        if (empty($areaEmails)) {
+            // Caso "Mantenimiento" / "Ventas Nacional": no hay correo real
+            // configurado todavía (ver config/contacto.php). No fallamos en
+            // silencio: se registra y se avisa amigablemente al usuario.
+            Log::error('Intento de envío de contacto a un área sin correo configurado.', [
+                'area' => $areaKey,
+            ]);
+
+            return redirect()->back()->withInput()->with('contacto_error', true);
+        }
+
+        $enviarA = array_map('trim', explode(',', $areaEmails));
+
+        try {
+            Mail::to($enviarA)->send(new \App\Mail\ContactoMail($data, $areaLabel));
+        } catch (\Throwable $e) {
+            Log::error('Error al enviar el formulario de contacto.', [
+                'area' => $areaKey,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->back()->withInput()->with('contacto_error', true);
+        }
+
+        return redirect(route(App::currentLocale() . '.inicio') . '?send=1');
     }
 
     public function verificarToken($token, $claveSecreta)

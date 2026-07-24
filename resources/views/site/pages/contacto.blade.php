@@ -19,48 +19,80 @@ $active = 'contacto';
                     {!! trans('contacto.form_text') !!}
                 </p>
 
+                @if(request('send') == '1')
+                    <div class="alert alert-success" role="alert" aria-live="polite">
+                        {{ App::currentLocale() == 'es'
+                            ? '¡Gracias! Tu mensaje fue enviado correctamente.'
+                            : 'Thank you! Your message was sent successfully.' }}
+                    </div>
+                @endif
+
+                @if(session('contacto_error'))
+                    <div class="alert alert-danger" role="alert" aria-live="assertive">
+                        {{ App::currentLocale() == 'es'
+                            ? 'No fue posible enviar tu mensaje en este momento. Por favor, inténtalo nuevamente más tarde.'
+                            : 'We were unable to send your message at this time. Please try again later.' }}
+                    </div>
+                @endif
+
+                @if($errors->any())
+                    <div class="alert alert-danger" role="alert" aria-live="assertive">
+                        <ul class="mb-0 pl-3">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 <form action="{{ route(App::currentLocale().'.contacto_enviar') }}" method="post" data-toggle="validator" data-disable="false" data-focus="false">
                     {{ csrf_field() }}
                     <input type="hidden" name="website" value="" />
                     <div class="form-group">
+                        {{--
+                            SEGURIDAD (requerimiento punto 18/24): el valor de cada <option>
+                            ya NO es una dirección de correo. Es una clave interna
+                            ("sistemas", "ventas_nacional", etc.) que el backend resuelve
+                            contra config/contacto.php. Así el usuario nunca controla el
+                            destinatario real del mensaje.
+                        --}}
                         <select name="area" class="form-control" data-error="{!! trans('contacto.area_error') !!}" required>
                             <option value="">{!! trans('contacto.area_label') !!}</option>
-                            <option value="rosa.rodriguez@mrlucky.com.mx">{!! trans('contacto.capitalhumano_label') !!}</option>
-                            {{-- <option value="lescobar@brandhouse.com.mx">Capital Humano 2</option> --}}
-                            <option value="mrhernandez@mrlucky.com.mx">{!! trans('contacto.calidad') !!}</option>
-                            <option value="comprasmp@mrlucky.com.mx,comprasmateriales@mrlucky.com.mx">{!! trans('contacto.proveedores') !!}</option>
-                            <option value="">{!! trans('contacto.mantenimiento') !!}</option>
-                            <option value="mercadotecnia@mrlucky.com.mx">{!! trans('contacto.mercadotecnia') !!}</option>
-                            <option value="msamano@mrluccky.com.mx">{!! trans('contacto.capitalhumano_label') !!}</option>
-                            <option value="sistemas@mrlucky.com.mx">{!! trans('contacto.sistemas') !!}</option>
-                            <option value="orders@mrlucky.com.mx">{!! trans('contacto.ventasexportacion') !!}</option>
-                            <option value="">{!! trans('contacto.ventasnacional') !!}</option>
+                            <option value="capital_humano" {{ old('area') == 'capital_humano' ? 'selected' : '' }}>{!! trans('contacto.capitalhumano_label') !!}</option>
+                            <option value="calidad" {{ old('area') == 'calidad' ? 'selected' : '' }}>{!! trans('contacto.calidad') !!}</option>
+                            <option value="proveedores" {{ old('area') == 'proveedores' ? 'selected' : '' }}>{!! trans('contacto.proveedores') !!}</option>
+                            <option value="mantenimiento" {{ old('area') == 'mantenimiento' ? 'selected' : '' }}>{!! trans('contacto.mantenimiento') !!}</option>
+                            <option value="mercadotecnia" {{ old('area') == 'mercadotecnia' ? 'selected' : '' }}>{!! trans('contacto.mercadotecnia') !!}</option>
+                            <option value="recursos_humanos_2" {{ old('area') == 'recursos_humanos_2' ? 'selected' : '' }}>{!! trans('contacto.capitalhumano_label') !!}</option>
+                            <option value="sistemas" {{ old('area') == 'sistemas' ? 'selected' : '' }}>{!! trans('contacto.sistemas') !!}</option>
+                            <option value="ventas_exportacion" {{ old('area') == 'ventas_exportacion' ? 'selected' : '' }}>{!! trans('contacto.ventasexportacion') !!}</option>
+                            <option value="ventas_nacional" {{ old('area') == 'ventas_nacional' ? 'selected' : '' }}>{!! trans('contacto.ventasnacional') !!}</option>
                         </select>
                         <small class="help-block with-errors"></small>
                         {{-- Copia a: ricardo.cortes@mrlucky.com.mxmusabiaga@mrlucky.com.mxadrian.ortega@mrlucky.com.mx --}}
                     </div>
                     <div class="form-group">
-                        <input type="text" name="nombre" class="form-control" placeholder="{!! trans('contacto.nombre_label') !!}" data-error="{!! trans('contacto.nombre_error') !!}" required>
+                        <input type="text" name="nombre" class="form-control" value="{{ old('nombre') }}" placeholder="{!! trans('contacto.nombre_label') !!}" data-error="{!! trans('contacto.nombre_error') !!}" required>
                         <small class="help-block with-errors"></small>
                     </div>
                     <div class="form-group">
-                        <input type="text" name="empresa" class="form-control" placeholder="{!! trans('contacto.empresa_label') !!}" data-error="{!! trans('contacto.empresa_error') !!}" required>
+                        <input type="text" name="empresa" class="form-control" value="{{ old('empresa') }}" placeholder="{!! trans('contacto.empresa_label') !!}" data-error="{!! trans('contacto.empresa_error') !!}" required>
                         <small class="help-block with-errors"></small>
                     </div>
                     <div class="form-group">
-                        <input type="text" name="telefono" class="form-control" placeholder="{!! trans('contacto.telefono_label') !!}">
+                        <input type="text" name="telefono" class="form-control" value="{{ old('telefono') }}" placeholder="{!! trans('contacto.telefono_label') !!}">
                         <small class="help-block with-errors"></small>
                     </div>
                     <div class="form-group">
-                        <input type="email" name="email" class="form-control" placeholder="{!! trans('contacto.email_label') !!}" data-error="{!! trans('contacto.correo_error') !!}" data-required-error="{!! trans('contacto.correo_error2') !!}" required>
+                        <input type="email" name="email" class="form-control" value="{{ old('email') }}" placeholder="{!! trans('contacto.email_label') !!}" data-error="{!! trans('contacto.correo_error') !!}" data-required-error="{!! trans('contacto.correo_error2') !!}" required>
                         <small class="help-block with-errors"></small>
                     </div>
                     <div class="form-group">
-                        <input type="text" name="ciudad" class="form-control" placeholder="{!! trans('contacto.ciudad_label') !!}" data-error="{!! trans('contacto.ciudad_error') !!}" required>
+                        <input type="text" name="ciudad" class="form-control" value="{{ old('ciudad') }}" placeholder="{!! trans('contacto.ciudad_label') !!}" data-error="{!! trans('contacto.ciudad_error') !!}" required>
                         <small class="help-block with-errors"></small>
                     </div>
                     <div class="form-group">
-                        <textarea name="comentarios" rows="5" class="form-control" placeholder="{!! trans('contacto.comentarios_label') !!}" data-error="{!! trans('contacto.comentario_error') !!}" required></textarea>
+                        <textarea name="comentarios" rows="5" class="form-control" placeholder="{!! trans('contacto.comentarios_label') !!}" data-error="{!! trans('contacto.comentario_error') !!}" required>{{ old('comentarios') }}</textarea>
                         <small class="help-block with-errors"></small>
                     </div>
                     <div class="form-group">

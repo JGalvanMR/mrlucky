@@ -66,8 +66,38 @@ Route::get('/en/commitment', [SiteController::class, 'compromiso'])->name('en.co
 Route::get('/certificaciones', [SiteController::class, 'certificaciones'])->name('es.certificaciones');
 Route::get('/en/certifications', [SiteController::class, 'certificaciones'])->name('en.certificaciones');
 
-// Descarga de PDF (protegida)
-Route::get('/certificaciones/descargar/{certificacion}', [CertificacionController::class, 'descargar'])->name('certificaciones.descargar');
+// Visor protegido del PDF (solo lectura en línea, "inline"; nunca fuerza descarga
+// y nunca expone una ruta pública directa al archivo original en /storage o /public).
+Route::get('/certificaciones/ver/{certificacion}', [CertificacionController::class, 'ver'])->name('certificaciones.ver');
+Route::get('/en/certifications/view/{certificacion}', [CertificacionController::class, 'ver'])->name('en.certificaciones.ver');
+
+// Solicitud de descarga: el usuario ya NO puede descargar el PDF directamente.
+// Debe llenar un formulario; la solicitud se envía por correo al área
+// responsable, que decide cómo entregar el documento (ver punto 12 del requerimiento).
+Route::get('/certificaciones/solicitar-descarga/{certificacion}', [CertificacionController::class, 'solicitarDescarga'])->name('certificaciones.solicitar_descarga');
+Route::get('/en/certifications/request-download/{certificacion}', [CertificacionController::class, 'solicitarDescarga'])->name('en.certificaciones.solicitar_descarga');
+
+Route::post('/certificaciones/solicitar-descarga/{certificacion}', [CertificacionController::class, 'enviarSolicitudDescarga'])
+    ->middleware('throttle:5,1')
+    ->name('certificaciones.solicitar_descarga.enviar');
+Route::post('/en/certifications/request-download/{certificacion}', [CertificacionController::class, 'enviarSolicitudDescarga'])
+    ->middleware('throttle:5,1')
+    ->name('en.certificaciones.solicitar_descarga.enviar');
+
+// Catálogo general de certificaciones (CCOF, C-TPAT, SQF, Kosher, FTUSA, SMETA)
+// — antes servido como PDF público descargable, ahora solo consulta + solicitud.
+Route::get('/certificaciones/consultar/{slug}', [CertificacionController::class, 'verGeneral'])->name('certificaciones.ver_general');
+Route::get('/en/certifications/view-general/{slug}', [CertificacionController::class, 'verGeneral'])->name('en.certificaciones.ver_general');
+
+Route::get('/certificaciones/solicitar-descarga-general/{slug}', [CertificacionController::class, 'solicitarDescargaGeneral'])->name('certificaciones.solicitar_descarga_general');
+Route::get('/en/certifications/request-download-general/{slug}', [CertificacionController::class, 'solicitarDescargaGeneral'])->name('en.certificaciones.solicitar_descarga_general');
+
+Route::post('/certificaciones/solicitar-descarga-general/{slug}', [CertificacionController::class, 'enviarSolicitudDescargaGeneral'])
+    ->middleware('throttle:5,1')
+    ->name('certificaciones.solicitar_descarga_general.enviar');
+Route::post('/en/certifications/request-download-general/{slug}', [CertificacionController::class, 'enviarSolicitudDescargaGeneral'])
+    ->middleware('throttle:5,1')
+    ->name('en.certificaciones.solicitar_descarga_general.enviar');
 
 // Productos
 Route::get('/productos', [SiteController::class, 'productos'])->name('es.productos');
@@ -100,8 +130,8 @@ Route::get('/en/group-u', [SiteController::class, 'grupoU'])->name('en.grupo_u')
 // Contacto
 Route::get('/contacto', [SiteController::class, 'contacto'])->name('es.contacto');
 Route::get('/en/contact-us', [SiteController::class, 'contacto'])->name('en.contacto');
-Route::post('/contacto', [SiteController::class, 'enviarContacto'])->name('es.contacto_enviar');
-Route::post('/en/contact-us', [SiteController::class, 'enviarContacto'])->name('en.contacto_enviar');
+Route::post('/contacto', [SiteController::class, 'enviarContacto'])->middleware('throttle:5,1')->name('es.contacto_enviar');
+Route::post('/en/contact-us', [SiteController::class, 'enviarContacto'])->middleware('throttle:5,1')->name('en.contacto_enviar');
 
 // Vacantes
 Route::get('/vacantes', [SiteController::class, 'vacantes'])->name('es.vacantes');

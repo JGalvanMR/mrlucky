@@ -25,32 +25,32 @@
             </h4>
             <div class="row text-center align-items-center justify-content-center">
                 <div class="col-6 col-md-3 col-lg-2 mb-3">
-                    <a href="/site/certificaciones/ccof.pdf" target="_blank" rel="noopener">
+                    <a href="{{ route(App::currentLocale() == 'en' ? 'en.certificaciones.ver_general' : 'certificaciones.ver_general', 'ccof') }}" target="_blank" rel="noopener">
                         <img src="/site/img/certificaciones/01.jpg" class="img-fluid" loading="lazy" alt="CCOF">
                     </a>
                 </div>
                 <div class="col-6 col-md-3 col-lg-2 mb-3">
-                    <a href="/site/certificaciones/c-tpat.pdf" target="_blank" rel="noopener">
+                    <a href="{{ route(App::currentLocale() == 'en' ? 'en.certificaciones.ver_general' : 'certificaciones.ver_general', 'c-tpat') }}" target="_blank" rel="noopener">
                         <img src="/site/img/certificaciones/02.jpg" class="img-fluid" loading="lazy" alt="C-TPAT">
                     </a>
                 </div>
                 <div class="col-6 col-md-3 col-lg-2 mb-3">
-                    <a href="/site/certificaciones/sqf.pdf" target="_blank" rel="noopener">
+                    <a href="{{ route(App::currentLocale() == 'en' ? 'en.certificaciones.ver_general' : 'certificaciones.ver_general', 'sqf') }}" target="_blank" rel="noopener">
                         <img src="/site/img/certificaciones/04.jpg" class="img-fluid" loading="lazy" alt="SQF">
                     </a>
                 </div>
                 <div class="col-6 col-md-3 col-lg-2 mb-3">
-                    <a href="/site/certificaciones/kosher.pdf" target="_blank" rel="noopener">
+                    <a href="{{ route(App::currentLocale() == 'en' ? 'en.certificaciones.ver_general' : 'certificaciones.ver_general', 'kosher') }}" target="_blank" rel="noopener">
                         <img src="/site/img/certificaciones/03.jpg" class="img-fluid" loading="lazy" alt="Kosher">
                     </a>
                 </div>
                 <div class="col-6 col-md-3 col-lg-2 mb-3">
-                    <a href="/site/certificaciones/FTUSA_CRT.pdf" target="_blank" rel="noopener">
+                    <a href="{{ route(App::currentLocale() == 'en' ? 'en.certificaciones.ver_general' : 'certificaciones.ver_general', 'ftusa') }}" target="_blank" rel="noopener">
                         <img src="/site/img/certificaciones/06.jpg" class="img-fluid" loading="lazy" alt="FTUSA">
                     </a>
                 </div>
                 <div class="col-6 col-md-3 col-lg-2 mb-3">
-                    <a href="/site/certificaciones/smeta.pdf" target="_blank" rel="noopener">
+                    <a href="{{ route(App::currentLocale() == 'en' ? 'en.certificaciones.ver_general' : 'certificaciones.ver_general', 'smeta') }}" target="_blank" rel="noopener">
                         <img src="/site/img/certificaciones/05.jpg" class="img-fluid" loading="lazy" alt="SMETA">
                     </a>
                 </div>

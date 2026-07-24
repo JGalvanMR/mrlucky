@@ -213,27 +213,27 @@
 			<div class="my-4 m700 mx-auto">
 				<div class="row text-center">
 					<div class="col-7 col-md">
-						<a href="/site/certificaciones/ccof.pdf" target="_blank">
+						<a href="{{ route(App::currentLocale() == 'en' ? 'en.certificaciones.ver_general' : 'certificaciones.ver_general', 'ccof') }}" target="_blank">
 							<img src="/site/img/certificaciones/01.jpg" class="img-fluid" loading="lazy" alt="">
 						</a>
 					</div>
 					<div class="col-7 col-md">
-						<a href="/site/certificaciones/c-tpat.pdf" target="_blank">
+						<a href="{{ route(App::currentLocale() == 'en' ? 'en.certificaciones.ver_general' : 'certificaciones.ver_general', 'c-tpat') }}" target="_blank">
 							<img src="/site/img/certificaciones/02.jpg" class="img-fluid" loading="lazy" alt="">
 						</a>
 					</div>
 					<div class="col-7 col-md">
-						<a href="/site/certificaciones/kosher.pdf" target="_blank">
+						<a href="{{ route(App::currentLocale() == 'en' ? 'en.certificaciones.ver_general' : 'certificaciones.ver_general', 'kosher') }}" target="_blank">
 							<img src="/site/img/certificaciones/03.jpg" class="img-fluid" loading="lazy" alt="">
 						</a>
 					</div>
 					<div class="col-7 col-md">
-						<a href="/site/certificaciones/sqf.pdf" target="_blank">
+						<a href="{{ route(App::currentLocale() == 'en' ? 'en.certificaciones.ver_general' : 'certificaciones.ver_general', 'sqf') }}" target="_blank">
 							<img src="/site/img/certificaciones/04.jpg" class="img-fluid" loading="lazy" alt="">
 						</a>
 					</div>
 					<div class="col-7 col-md">
-						<a href="/site/certificaciones/smeta.pdf" target="_blank">
+						<a href="{{ route(App::currentLocale() == 'en' ? 'en.certificaciones.ver_general' : 'certificaciones.ver_general', 'smeta') }}" target="_blank">
 							<img src="/site/img/certificaciones/05.jpg" class="img-fluid" loading="lazy" alt="">
 						</a>
 					</div>

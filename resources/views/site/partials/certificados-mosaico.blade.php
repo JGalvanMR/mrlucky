@@ -186,18 +186,33 @@
 
                         </div>{{-- /.cert-detalles --}}
 
-                        {{-- Botón de descarga PDF --}}
+                        {{-- Consultar el certificado (visor inline) + solicitar descarga.
+                             Requerimiento de Gerencia: los certificados se pueden consultar
+                             libremente, pero NO existe un botón de descarga directa. Para
+                             obtener una copia, el usuario debe llenar un formulario. --}}
                         @if($cert->pdf_url)
-                            <a href="{{ $cert->pdf_url }}"
-                               class="cert-btn-descarga {{ !$vigente ? 'cert-btn-descarga--vencido' : '' }}"
-                               target="_blank"
-                               rel="noopener noreferrer"
-                               aria-label="{{ App::currentLocale() == 'es'
-                                    ? 'Descargar certificado PDF de ' . $rancho->nombre
-                                    : 'Download PDF certificate for ' . $rancho->nombre }}">
-                                <i class="fa fa-file-pdf-o mr-1" aria-hidden="true"></i>
-                                {{ App::currentLocale() == 'es' ? 'Descargar Certificado' : 'Download Certificate' }}
-                            </a>
+                            <div class="cert-acciones d-flex flex-column flex-sm-row" style="gap:.5rem;">
+                                <a href="{{ $cert->pdf_url }}"
+                                   class="cert-btn-descarga {{ !$vigente ? 'cert-btn-descarga--vencido' : '' }}"
+                                   target="_blank"
+                                   rel="noopener noreferrer"
+                                   data-analytics-event="certificate_view"
+                                   aria-label="{{ App::currentLocale() == 'es'
+                                        ? 'Consultar certificado PDF de ' . $rancho->nombre
+                                        : 'View PDF certificate for ' . $rancho->nombre }}">
+                                    <i class="fa fa-file-pdf-o mr-1" aria-hidden="true"></i>
+                                    {{ App::currentLocale() == 'es' ? 'Ver Certificado' : 'View Certificate' }}
+                                </a>
+                                <a href="{{ $cert->solicitud_descarga_url }}"
+                                   class="cert-btn-solicitar"
+                                   data-analytics-event="certificate_request_open"
+                                   aria-label="{{ App::currentLocale() == 'es'
+                                        ? 'Solicitar descarga del certificado de ' . $rancho->nombre
+                                        : 'Request download of the certificate for ' . $rancho->nombre }}">
+                                    <i class="fa fa-download mr-1" aria-hidden="true"></i>
+                                    {{ App::currentLocale() == 'es' ? 'Solicitar Descarga' : 'Request Download' }}
+                                </a>
+                            </div>
                         @else
                             <span class="cert-sin-pdf small gris">
                                 <i class="fa fa-file-o mr-1" aria-hidden="true"></i>
