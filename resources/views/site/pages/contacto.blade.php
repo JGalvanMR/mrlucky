@@ -99,8 +99,8 @@ $active = 'contacto';
                         <small class="help-block with-errors"></small>
                     </div>
                     <div class="form-group">
-                        <!-- <div class="g-recaptcha" data-callback="recaptchaCallback" data-sitekey="6LezXjArAAAAALY_fO3Kc5EV6oN0zqx8GigB66Tu"></div> -->
-                        <div class="g-recaptcha" data-callback="recaptchaCallback" data-sitekey="6Lenp2MtAAAAAIQom3adW0IeyYXPmkljRDlxx8J_"></div>
+                        <div class="g-recaptcha" data-callback="recaptchaCallback" data-sitekey="6LezXjArAAAAALY_fO3Kc5EV6oN0zqx8GigB66Tu"></div>
+                        <!-- <div class="g-recaptcha" data-callback="recaptchacallback" data-sitekey="6lenp2mtaaaaaiqom3adw0ieyyxpmkljrdlxx8j_"></div> -->
                     </div>
                     <div class="form-group">
                         <button id="btnEnviar" class="btn btn-block btn-enviar py-3" type="submit" disabled>

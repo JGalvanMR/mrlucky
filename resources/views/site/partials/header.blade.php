@@ -33,8 +33,8 @@
                     </a>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
                         <li>
-                            <a class="dropdown-item" href="{{ route( App::currentLocale() . '.compromiso') }}">{!!trans('web.menu_compromiso_text')!!}</a>
-                            <a class="dropdown-item" href="{{ route( App::currentLocale() . '.certificaciones') }}">{!!trans('web.menu_certificaciones_text')!!}</a>
+                            <a class="dropdown-item" href="{{ route( App::currentLocale() . '.compromiso') }}">{!! trans('web.menu_compromiso_text') !!}</a>
+                            <a class="dropdown-item" href="{{ route( App::currentLocale() . '.certificaciones') }}">{!! trans('web.menu_certificaciones_text') !!}</a>
                         </li>
                     </div>
                 </div>

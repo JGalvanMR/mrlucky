@@ -167,38 +167,38 @@ class SiteController extends Controller
 
     /*-----------------Certificaciones-----------------*/
     public function certificaciones()
-{
-    $tipoSlug = 'primusgfs';
+    {
+        $tipoSlug = 'primusgfs';
 
-    $tipoCertificacion = Cache::remember("tipo_cert.{$tipoSlug}", 3600, function () use ($tipoSlug) {
-        return TipoCertificacion::where('slug', $tipoSlug)
-            ->where('activo', true)
-            ->firstOrFail();
-    });
+        $tipoCertificacion = Cache::remember("tipo_cert.{$tipoSlug}", 3600, function () use ($tipoSlug) {
+            return TipoCertificacion::where('slug', $tipoSlug)
+                ->where('activo', true)
+                ->firstOrFail();
+        });
 
-    $cacheKey = "mosaico.{$tipoSlug}.publico";
-    $ranchos = Cache::remember($cacheKey, 1800, function () use ($tipoCertificacion) {
-        return Rancho::activos()
-            ->with([
-                'certificacion' => function ($query) use ($tipoCertificacion) {
-                    $query->where('tipo_certificacion_id', $tipoCertificacion->id)
-                        ->where('visible_publico', true)
-                        ->orderByDesc('fecha_vencimiento');
-                }
-            ])
-            ->whereHas('certificacion', function ($q) use ($tipoCertificacion) {
-                $q->where('tipo_certificacion_id', $tipoCertificacion->id)
-                  ->where('visible_publico', true);
-            })
-            ->get()
-            ->map(function ($rancho) {
-                $rancho->cert = $rancho->certificacion->first();
-                return $rancho;
-            });
-    });
+        $cacheKey = "mosaico.{$tipoSlug}.publico";
+        $ranchos = Cache::remember($cacheKey, 1800, function () use ($tipoCertificacion) {
+            return Rancho::activos()
+                ->with([
+                    'certificacion' => function ($query) use ($tipoCertificacion) {
+                        $query->where('tipo_certificacion_id', $tipoCertificacion->id)
+                            ->where('visible_publico', true)
+                            ->orderByDesc('fecha_vencimiento');
+                    }
+                ])
+                ->whereHas('certificacion', function ($q) use ($tipoCertificacion) {
+                    $q->where('tipo_certificacion_id', $tipoCertificacion->id)
+                        ->where('visible_publico', true);
+                })
+                ->get()
+                ->map(function ($rancho) {
+                    $rancho->cert = $rancho->certificacion->first();
+                    return $rancho;
+                });
+        });
 
-    return view('site.pages.certificaciones', compact('ranchos', 'tipoCertificacion'));
-}
+        return view('site.pages.certificaciones', compact('ranchos', 'tipoCertificacion'));
+    }
 
     /*---------- Productos ----------*/
     public function productos()
@@ -477,8 +477,8 @@ class SiteController extends Controller
             return redirect()->back()->withInput()->withErrors(['captcha' => 'Debes completar el captcha']);
         }
 
-        // $verificado = $this->verificarToken($token, '6LezXjArAAAAAFONZGhY728H82z4DzsQ5AEpMHoS');
-        $verificado = $this->verificarToken($token, '6Lenp2MtAAAAACeWrEPWWiW60aQNy5MToT68vjCR');
+        $verificado = $this->verificarToken($token, '6LezXjArAAAAAFONZGhY728H82z4DzsQ5AEpMHoS');
+        // $verificado = $this->verificarToken($token, '6Lenp2MtAAAAACeWrEPWWiW60aQNy5MToT68vjCR');
 
         if (!$verificado) {
             return redirect()->back()->withInput()->withErrors(['captcha' => 'No se pudo verificar el captcha, inténtalo de nuevo.']);

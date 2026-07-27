@@ -63,7 +63,7 @@ class Certificacion extends Model
     public function scopeVigentes($query)
     {
         return $query->where('estado', 'vigente')
-                     ->where('fecha_vencimiento', '>=', now()->toDateString());
+            ->where('fecha_vencimiento', '>=', now()->toDateString());
     }
 
     /**
