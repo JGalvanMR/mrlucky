@@ -10,24 +10,21 @@ class SolicitudDescargaCertificadoMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public array $datos;
-    public string $nombreCertificado;
-    public string|int $idCertificado;
+    /**
+     * @param string $nombreCertificado Nombre legible del certificado solicitado
+     * @param string|int $idCertificado ID o slug interno del certificado
+     * @param array $datos Datos validados del formulario
+     */
+    public function __construct(
+        public string $nombreCertificado,
+        public string|int $idCertificado,
+        public array $datos
+    ) {}
 
     /**
-     * @param  string      $nombreCertificado  Nombre legible del certificado solicitado
-     * @param  string|int  $idCertificado      ID o slug interno del certificado
-     * @param  array       $datos              Datos ya validados del formulario
-     *                                         (nombre, puesto, empresa, correo, telefono, contacto_gab, uso)
+     * Construye el mensaje de correo.
      */
-    public function __construct(string $nombreCertificado, string|int $idCertificado, array $datos)
-    {
-        $this->nombreCertificado = $nombreCertificado;
-        $this->idCertificado = $idCertificado;
-        $this->datos = $datos;
-    }
-
-    public function build()
+    public function build(): static
     {
         return $this
             ->from(config('mail.from.address'), config('mail.from.name'))
@@ -36,8 +33,8 @@ class SolicitudDescargaCertificadoMail extends Mailable
             ->view('mails.solicitud-descarga-certificado')
             ->with([
                 'nombreCertificado' => $this->nombreCertificado,
-                'idCertificado' => $this->idCertificado,
-                'datos' => $this->datos,
+                'idCertificado'     => $this->idCertificado,
+                'datos'             => $this->datos,
             ]);
     }
 }

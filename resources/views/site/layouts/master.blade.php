@@ -41,7 +41,10 @@
 
 </head>
 <body>
-    
+
+	@include('site.partials.header')
+
+	@yield('page')
 	@include('site.partials.header')
 
 	@yield('page')
@@ -245,8 +248,6 @@
 	</script>
 	@yield('customJS')
 
-
-
 <!-- Cookie Banner -->
 <div id="cookie-banner" style="position:fixed;bottom:0;left:0;width:100%;background:#222;color:#fff;padding:15px;text-align:center;z-index:9999;display:none;font-size:14px;">
 Este sitio utiliza cookies para mejorar tu experiencia.
@@ -270,25 +271,7 @@ function loadMatomo() {
     var d=document, g=d.createElement("script"), s=d.getElementsByTagName("script")[0];
     g.async=true; g.src=u+"matomo.js"; s.parentNode.insertBefore(g,s);
   })();
-}
-
-document.addEventListener("DOMContentLoaded", function(){
-    var consent = localStorage.getItem("cookie_consent");
-
-    if(consent === "accepted"){
-        loadMatomo();
-    }else if(consent === null){
-        document.getElementById("cookie-banner").style.display = "block";
-    }
-
-    document.getElementById("accept-cookies").onclick = function(){
-        localStorage.setItem("cookie_consent","accepted");
-        document.getElementById("cookie-banner").style.display="none";
-        loadMatomo();
-    };
-
-    document.getElementById("reject-cookies").onclick = function(){
-        localStorage.setItem("cookie_consent","rejected");
+     localStorage.setItem("cookie_consent","rejected");
         document.getElementById("cookie-banner").style.display="none";
     };
 });

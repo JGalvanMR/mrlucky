@@ -24,7 +24,7 @@ class ContactoRequest extends FormRequest
             'comentarios' => ['required', 'string', 'max:2000'],
 
             // Honeypot anti-spam
-            'website' => ['prohibited'],
+            'website' => ['nullable', 'max:0'],
         ];
     }
 }

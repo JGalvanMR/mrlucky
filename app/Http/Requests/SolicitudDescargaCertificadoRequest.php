@@ -23,7 +23,7 @@ class SolicitudDescargaCertificadoRequest extends FormRequest
             'uso' => ['required', 'string', 'max:' . config('certificaciones.uso_max_length', 500)],
 
             // Honeypot anti-spam: campo invisible que un humano nunca llena.
-            'website' => ['prohibited'],
+            'website' => ['nullable', 'max:0'],
         ];
     }
 

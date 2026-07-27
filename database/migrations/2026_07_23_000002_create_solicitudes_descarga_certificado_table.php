@@ -35,7 +35,7 @@ return new class extends Migration
 
             $table->timestamps();
 
-            $table->index(['certificacion_id', 'created_at']);
+            $table->index(['certificacion_id', 'created_at'], 'sdc_certificacion_created_idx');
         });
     }
 

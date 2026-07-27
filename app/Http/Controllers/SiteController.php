@@ -477,7 +477,8 @@ class SiteController extends Controller
             return redirect()->back()->withInput()->withErrors(['captcha' => 'Debes completar el captcha']);
         }
 
-        $verificado = $this->verificarToken($token, '6LezXjArAAAAAFONZGhY728H82z4DzsQ5AEpMHoS');
+        // $verificado = $this->verificarToken($token, '6LezXjArAAAAAFONZGhY728H82z4DzsQ5AEpMHoS');
+        $verificado = $this->verificarToken($token, '6Lenp2MtAAAAACeWrEPWWiW60aQNy5MToT68vjCR');
 
         if (!$verificado) {
             return redirect()->back()->withInput()->withErrors(['captcha' => 'No se pudo verificar el captcha, inténtalo de nuevo.']);

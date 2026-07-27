@@ -20,34 +20,37 @@ $active = 'contacto';
                 </p>
 
                 @if(request('send') == '1')
-                    <div class="alert alert-success" role="alert" aria-live="polite">
-                        {{ App::currentLocale() == 'es'
+                <div class="alert alert-success" role="alert" aria-live="polite">
+                    {{ App::currentLocale() == 'es'
                             ? '¡Gracias! Tu mensaje fue enviado correctamente.'
                             : 'Thank you! Your message was sent successfully.' }}
-                    </div>
+                </div>
                 @endif
 
                 @if(session('contacto_error'))
-                    <div class="alert alert-danger" role="alert" aria-live="assertive">
-                        {{ App::currentLocale() == 'es'
+                <div class="alert alert-danger" role="alert" aria-live="assertive">
+                    {{ App::currentLocale() == 'es'
                             ? 'No fue posible enviar tu mensaje en este momento. Por favor, inténtalo nuevamente más tarde.'
                             : 'We were unable to send your message at this time. Please try again later.' }}
-                    </div>
+                </div>
                 @endif
 
                 @if($errors->any())
-                    <div class="alert alert-danger" role="alert" aria-live="assertive">
-                        <ul class="mb-0 pl-3">
-                            @foreach($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
+                <div class="alert alert-danger" role="alert" aria-live="assertive">
+                    <ul class="mb-0 pl-3">
+                        @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
                 @endif
 
                 <form action="{{ route(App::currentLocale().'.contacto_enviar') }}" method="post" data-toggle="validator" data-disable="false" data-focus="false">
                     {{ csrf_field() }}
-                    <input type="hidden" name="website" value="" />
+                    <div style="display: none !important;" aria-hidden="true">
+                        <input type="text" name="website" id="website" tabindex="-1" autocomplete="off" value="">
+                    </div>
+                    <!-- <input type="hidden" name="website" value="" /> -->
                     <div class="form-group">
                         {{--
                             SEGURIDAD (requerimiento punto 18/24): el valor de cada <option>
@@ -96,7 +99,8 @@ $active = 'contacto';
                         <small class="help-block with-errors"></small>
                     </div>
                     <div class="form-group">
-                        <div class="g-recaptcha" data-callback="recaptchaCallback" data-sitekey="6LezXjArAAAAALY_fO3Kc5EV6oN0zqx8GigB66Tu"></div>
+                        <!-- <div class="g-recaptcha" data-callback="recaptchaCallback" data-sitekey="6LezXjArAAAAALY_fO3Kc5EV6oN0zqx8GigB66Tu"></div> -->
+                        <div class="g-recaptcha" data-callback="recaptchaCallback" data-sitekey="6Lenp2MtAAAAAIQom3adW0IeyYXPmkljRDlxx8J_"></div>
                     </div>
                     <div class="form-group">
                         <button id="btnEnviar" class="btn btn-block btn-enviar py-3" type="submit" disabled>
@@ -615,207 +619,241 @@ $active = 'contacto';
     @parent
     <style>
         /* ══ SECCIÓN DESCARGABLES ══════════════════════════ */
-.section-descargables { background: #fff; }
+        .section-descargables {
+            background: #fff;
+        }
 
-/* Grid adaptativo: 1 col mobile → 2 col tablet → 3 col desktop */
-.descargables-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 20px;
-}
-@media (min-width: 576px) {
-    .descargables-grid { grid-template-columns: repeat(2, 1fr); }
-}
-@media (min-width: 992px) {
-    .descargables-grid { grid-template-columns: repeat(3, 1fr); }
-}
+        /* Grid adaptativo: 1 col mobile → 2 col tablet → 3 col desktop */
+        .descargables-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
 
-/* ── Tarjeta base ── */
-.desc-card {
-    position: relative;
-    background: #fff;
-    border: 1px solid #e8edf5;
-    border-radius: 12px;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    box-shadow: 0 2px 12px rgba(0,60,166,0.06);
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-.desc-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 28px rgba(0,60,166,0.13);
-}
+        @media (min-width: 576px) {
+            .descargables-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
 
-/* Boletines tienen borde izquierdo azul */
-.desc-card--boletin {
-    border-left: 4px solid #003ca6;
-}
+        @media (min-width: 992px) {
+            .descargables-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
 
-/* Boletín destacado (último/más nuevo) */
-.desc-card--nuevo {
-    border-color: #56b276;
-    border-left-color: #56b276;
-    background: linear-gradient(135deg, #f0f7f2 0%, #ffffff 100%);
-}
+        /* ── Tarjeta base ── */
+        .desc-card {
+            position: relative;
+            background: #fff;
+            border: 1px solid #e8edf5;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            box-shadow: 0 2px 12px rgba(0, 60, 166, 0.06);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
 
-/* Badge "¡Nuevo!" */
-.desc-card-nuevo-badge {
-    position: absolute;
-    top: -1px;
-    right: 16px;
-    background: #56b276;
-    color: #fff;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    padding: 3px 10px;
-    border-radius: 0 0 8px 8px;
-}
+        .desc-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 28px rgba(0, 60, 166, 0.13);
+        }
 
-/* ── Ícono ── */
-.desc-card-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-.desc-card-icon .fa {
-    font-size: 20px;
-    color: #fff;
-}
+        /* Boletines tienen borde izquierdo azul */
+        .desc-card--boletin {
+            border-left: 4px solid #003ca6;
+        }
 
-/* ── Cuerpo de la tarjeta ── */
-.desc-card-body { flex: 1; }
+        /* Boletín destacado (último/más nuevo) */
+        .desc-card--nuevo {
+            border-color: #56b276;
+            border-left-color: #56b276;
+            background: linear-gradient(135deg, #f0f7f2 0%, #ffffff 100%);
+        }
 
-.desc-card-badge {
-    display: inline-block;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    padding: 2px 8px;
-    border-radius: 20px;
-    margin-bottom: 6px;
-}
-.desc-badge-catalogo { background: #e3f0ff; color: #003ca6; }
-.desc-badge-reporte  { background: #e8f5e9; color: #2e7d32; }
-.desc-badge-boletin  { background: #e3f0ff; color: #003ca6; }
-.desc-badge-receta   { background: #fff8e1; color: #e65100; }
+        /* Badge "¡Nuevo!" */
+        .desc-card-nuevo-badge {
+            position: absolute;
+            top: -1px;
+            right: 16px;
+            background: #56b276;
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 3px 10px;
+            border-radius: 0 0 8px 8px;
+        }
 
-.desc-card-title {
-    font-size: 14px;
-    font-weight: 600;
-    line-height: 1.4;
-    margin: 0 0 2px;
-    color: #003ca6;
-}
-.desc-card-sub {
-    font-size: 11px;
-    color: #7c8ba0;
-    margin: 0;
-}
+        /* ── Ícono ── */
+        .desc-card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
 
-/* ── Acciones ── */
-.desc-card-actions {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-}
+        .desc-card-icon .fa {
+            font-size: 20px;
+            color: #fff;
+        }
 
-/* Botón base */
-.desc-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 7px 14px;
-    border-radius: 50px;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.25s ease;
-    text-decoration: none !important;
-    border: 2px solid transparent;
-    white-space: nowrap;
-    font-family: 'Roboto', sans-serif;
-}
+        /* ── Cuerpo de la tarjeta ── */
+        .desc-card-body {
+            flex: 1;
+        }
 
-/* Ver revista (principal) */
-.desc-btn-flipbook {
-    background: #003ca6;
-    color: #fff !important;
-    border-color: #003ca6;
-    box-shadow: 0 3px 10px rgba(0,60,166,0.25);
-}
-.desc-btn-flipbook:hover {
-    background: #002d80;
-    border-color: #002d80;
-    transform: translateY(-1px);
-    box-shadow: 0 5px 16px rgba(0,60,166,0.35);
-    color: #fff !important;
-}
+        .desc-card-badge {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 2px 8px;
+            border-radius: 20px;
+            margin-bottom: 6px;
+        }
 
-/* Descargar PDF (secundario) */
-.desc-btn-pdf {
-    background: #fff;
-    color: #56b276 !important;
-    border-color: #56b276;
-}
-.desc-btn-pdf:hover {
-    background: #56b276;
-    color: #fff !important;
-    transform: translateY(-1px);
-}
+        .desc-badge-catalogo {
+            background: #e3f0ff;
+            color: #003ca6;
+        }
 
-/* Solo descargar (sin flipbook) */
-.desc-btn-download {
-    background: #f5f5f5;
-    color: #003ca6 !important;
-    border-color: #e1e1e1;
-}
-.desc-btn-download:hover {
-    background: #003ca6;
-    color: #fff !important;
-    border-color: #003ca6;
-}
+        .desc-badge-reporte {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
 
-/* ── Modal flipbook ── */
-.modal-flipbook-content {
-    border: none;
-    border-radius: 10px;
-    overflow: hidden;
-    background: #0c0805;
-    position: relative;
-}
+        .desc-badge-boletin {
+            background: #e3f0ff;
+            color: #003ca6;
+        }
 
-.modal-flipbook-close {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    z-index: 200;
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    border: 1px solid rgba(255,255,255,0.2);
-    background: rgba(0,0,0,0.6);
-    color: #fff;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    transition: background 0.2s;
-    backdrop-filter: blur(4px);
-}
-.modal-flipbook-close:hover {
-    background: rgba(219,6,50,0.85);
-    border-color: rgba(219,6,50,0.5);
-}
+        .desc-badge-receta {
+            background: #fff8e1;
+            color: #e65100;
+        }
+
+        .desc-card-title {
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 1.4;
+            margin: 0 0 2px;
+            color: #003ca6;
+        }
+
+        .desc-card-sub {
+            font-size: 11px;
+            color: #7c8ba0;
+            margin: 0;
+        }
+
+        /* ── Acciones ── */
+        .desc-card-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        /* Botón base */
+        .desc-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 7px 14px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-decoration: none !important;
+            border: 2px solid transparent;
+            white-space: nowrap;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        /* Ver revista (principal) */
+        .desc-btn-flipbook {
+            background: #003ca6;
+            color: #fff !important;
+            border-color: #003ca6;
+            box-shadow: 0 3px 10px rgba(0, 60, 166, 0.25);
+        }
+
+        .desc-btn-flipbook:hover {
+            background: #002d80;
+            border-color: #002d80;
+            transform: translateY(-1px);
+            box-shadow: 0 5px 16px rgba(0, 60, 166, 0.35);
+            color: #fff !important;
+        }
+
+        /* Descargar PDF (secundario) */
+        .desc-btn-pdf {
+            background: #fff;
+            color: #56b276 !important;
+            border-color: #56b276;
+        }
+
+        .desc-btn-pdf:hover {
+            background: #56b276;
+            color: #fff !important;
+            transform: translateY(-1px);
+        }
+
+        /* Solo descargar (sin flipbook) */
+        .desc-btn-download {
+            background: #f5f5f5;
+            color: #003ca6 !important;
+            border-color: #e1e1e1;
+        }
+
+        .desc-btn-download:hover {
+            background: #003ca6;
+            color: #fff !important;
+            border-color: #003ca6;
+        }
+
+        /* ── Modal flipbook ── */
+        .modal-flipbook-content {
+            border: none;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #0c0805;
+            position: relative;
+        }
+
+        .modal-flipbook-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 200;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.6);
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: background 0.2s;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-flipbook-close:hover {
+            background: rgba(219, 6, 50, 0.85);
+            border-color: rgba(219, 6, 50, 0.5);
+        }
+
         /* ── Entrada Boletín 14 ─────────────────────────── */
         .boletin-14-entry {
             background: linear-gradient(135deg, #f0f7f0 0%, #e8f0fd 100%);
