@@ -460,7 +460,7 @@ $active = 'contacto';
                     </button>
 
                     {{-- Botón secundario: descarga directa --}}
-                    <a href="/docs/RECETARIO CALABAZAS MR. LUCKY.pdf"
+                    <a href="/docs/RECETARIO%20CALABAZAS%20MR.%20LUCKY.pdf"
                         download
                         class="btn-boletin-pdf"
                         title="{{ App::currentLocale() == 'es' ? 'Descargar PDF' : 'Download PDF' }}">
@@ -594,7 +594,7 @@ $active = 'contacto';
             <div class="col-12 col-md-4 mb-5">
                 <a href="{{ route( App::currentLocale() . '.vacante', ['slug' => $vacante->slug] ) }}" class="text-decoration-none">
                     <div class="vacante card p-2 rounded shadow h-100">
-                        <img src="/uploads/{{ $vacante->imagen }}" class="img-fluid" alt="{{ $vacante->titulo }}" alt="{{ $vacante->titulo }}" loading="lazy">
+                        <img src="/uploads/{{ $vacante->imagen }}" class="img-fluid" alt="{{ $vacante->titulo }}" loading="lazy">
                         <div class="px-3 pb-2 bg-verde">
                             <span class="f600 d-block gris text-center text-white m-0 p-2">{{ $vacante->titulo }}</span>
                         </div>
@@ -612,350 +612,351 @@ $active = 'contacto';
             </a>
         </div>
     </div>
-    @endif
-    @stop
+</section> {{-- Añadida la etiqueta de cierre --}}
+@endif
+@stop
 
-    @section('customCSS')
-    @parent
-    <style>
-        /* ══ SECCIÓN DESCARGABLES ══════════════════════════ */
-        .section-descargables {
-            background: #fff;
-        }
+@section('customCSS')
+@parent
+<style>
+    /* ══ SECCIÓN DESCARGABLES ══════════════════════════ */
+    .section-descargables {
+        background: #fff;
+    }
 
-        /* Grid adaptativo: 1 col mobile → 2 col tablet → 3 col desktop */
+    /* Grid adaptativo: 1 col mobile → 2 col tablet → 3 col desktop */
+    .descargables-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    @media (min-width: 576px) {
         .descargables-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 20px;
+            grid-template-columns: repeat(2, 1fr);
         }
+    }
 
-        @media (min-width: 576px) {
-            .descargables-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+    @media (min-width: 992px) {
+        .descargables-grid {
+            grid-template-columns: repeat(3, 1fr);
         }
+    }
 
-        @media (min-width: 992px) {
-            .descargables-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
+    /* ── Tarjeta base ── */
+    .desc-card {
+        position: relative;
+        background: #fff;
+        border: 1px solid #e8edf5;
+        border-radius: 12px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        box-shadow: 0 2px 12px rgba(0, 60, 166, 0.06);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
 
-        /* ── Tarjeta base ── */
-        .desc-card {
-            position: relative;
-            background: #fff;
-            border: 1px solid #e8edf5;
-            border-radius: 12px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-            box-shadow: 0 2px 12px rgba(0, 60, 166, 0.06);
-            transition: transform 0.25s ease, box-shadow 0.25s ease;
-        }
+    .desc-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 28px rgba(0, 60, 166, 0.13);
+    }
 
-        .desc-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 28px rgba(0, 60, 166, 0.13);
-        }
+    /* Boletines tienen borde izquierdo azul */
+    .desc-card--boletin {
+        border-left: 4px solid #003ca6;
+    }
 
-        /* Boletines tienen borde izquierdo azul */
-        .desc-card--boletin {
-            border-left: 4px solid #003ca6;
-        }
+    /* Boletín destacado (último/más nuevo) */
+    .desc-card--nuevo {
+        border-color: #56b276;
+        border-left-color: #56b276;
+        background: linear-gradient(135deg, #f0f7f2 0%, #ffffff 100%);
+    }
 
-        /* Boletín destacado (último/más nuevo) */
-        .desc-card--nuevo {
-            border-color: #56b276;
-            border-left-color: #56b276;
-            background: linear-gradient(135deg, #f0f7f2 0%, #ffffff 100%);
-        }
+    /* Badge "¡Nuevo!" */
+    .desc-card-nuevo-badge {
+        position: absolute;
+        top: -1px;
+        right: 16px;
+        background: #56b276;
+        color: #fff;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        padding: 3px 10px;
+        border-radius: 0 0 8px 8px;
+    }
 
-        /* Badge "¡Nuevo!" */
-        .desc-card-nuevo-badge {
-            position: absolute;
-            top: -1px;
-            right: 16px;
-            background: #56b276;
-            color: #fff;
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            padding: 3px 10px;
-            border-radius: 0 0 8px 8px;
-        }
+    /* ── Ícono ── */
+    .desc-card-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
 
-        /* ── Ícono ── */
-        .desc-card-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
+    .desc-card-icon .fa {
+        font-size: 20px;
+        color: #fff;
+    }
 
-        .desc-card-icon .fa {
-            font-size: 20px;
-            color: #fff;
-        }
+    /* ── Cuerpo de la tarjeta ── */
+    .desc-card-body {
+        flex: 1;
+    }
 
-        /* ── Cuerpo de la tarjeta ── */
-        .desc-card-body {
-            flex: 1;
-        }
+    .desc-card-badge {
+        display: inline-block;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        padding: 2px 8px;
+        border-radius: 20px;
+        margin-bottom: 6px;
+    }
 
-        .desc-card-badge {
-            display: inline-block;
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            padding: 2px 8px;
-            border-radius: 20px;
-            margin-bottom: 6px;
-        }
+    .desc-badge-catalogo {
+        background: #e3f0ff;
+        color: #003ca6;
+    }
 
-        .desc-badge-catalogo {
-            background: #e3f0ff;
-            color: #003ca6;
-        }
+    .desc-badge-reporte {
+        background: #e8f5e9;
+        color: #2e7d32;
+    }
 
-        .desc-badge-reporte {
-            background: #e8f5e9;
-            color: #2e7d32;
-        }
+    .desc-badge-boletin {
+        background: #e3f0ff;
+        color: #003ca6;
+    }
 
-        .desc-badge-boletin {
-            background: #e3f0ff;
-            color: #003ca6;
-        }
+    .desc-badge-receta {
+        background: #fff8e1;
+        color: #e65100;
+    }
 
-        .desc-badge-receta {
-            background: #fff8e1;
-            color: #e65100;
-        }
+    .desc-card-title {
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 1.4;
+        margin: 0 0 2px;
+        color: #003ca6;
+    }
 
-        .desc-card-title {
-            font-size: 14px;
-            font-weight: 600;
-            line-height: 1.4;
-            margin: 0 0 2px;
-            color: #003ca6;
-        }
+    .desc-card-sub {
+        font-size: 11px;
+        color: #7c8ba0;
+        margin: 0;
+    }
 
-        .desc-card-sub {
-            font-size: 11px;
-            color: #7c8ba0;
-            margin: 0;
-        }
+    /* ── Acciones ── */
+    .desc-card-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
 
-        /* ── Acciones ── */
-        .desc-card-actions {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
+    /* Botón base */
+    .desc-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 7px 14px;
+        border-radius: 50px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        text-decoration: none !important;
+        border: 2px solid transparent;
+        white-space: nowrap;
+        font-family: 'Roboto', sans-serif;
+    }
 
-        /* Botón base */
-        .desc-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            padding: 7px 14px;
-            border-radius: 50px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            text-decoration: none !important;
-            border: 2px solid transparent;
-            white-space: nowrap;
-            font-family: 'Roboto', sans-serif;
-        }
+    /* Ver revista (principal) */
+    .desc-btn-flipbook {
+        background: #003ca6;
+        color: #fff !important;
+        border-color: #003ca6;
+        box-shadow: 0 3px 10px rgba(0, 60, 166, 0.25);
+    }
 
-        /* Ver revista (principal) */
-        .desc-btn-flipbook {
-            background: #003ca6;
-            color: #fff !important;
-            border-color: #003ca6;
-            box-shadow: 0 3px 10px rgba(0, 60, 166, 0.25);
-        }
+    .desc-btn-flipbook:hover {
+        background: #002d80;
+        border-color: #002d80;
+        transform: translateY(-1px);
+        box-shadow: 0 5px 16px rgba(0, 60, 166, 0.35);
+        color: #fff !important;
+    }
 
-        .desc-btn-flipbook:hover {
-            background: #002d80;
-            border-color: #002d80;
-            transform: translateY(-1px);
-            box-shadow: 0 5px 16px rgba(0, 60, 166, 0.35);
-            color: #fff !important;
-        }
+    /* Descargar PDF (secundario) */
+    .desc-btn-pdf {
+        background: #fff;
+        color: #56b276 !important;
+        border-color: #56b276;
+    }
 
-        /* Descargar PDF (secundario) */
-        .desc-btn-pdf {
-            background: #fff;
-            color: #56b276 !important;
-            border-color: #56b276;
-        }
+    .desc-btn-pdf:hover {
+        background: #56b276;
+        color: #fff !important;
+        transform: translateY(-1px);
+    }
 
-        .desc-btn-pdf:hover {
-            background: #56b276;
-            color: #fff !important;
-            transform: translateY(-1px);
-        }
+    /* Solo descargar (sin flipbook) */
+    .desc-btn-download {
+        background: #f5f5f5;
+        color: #003ca6 !important;
+        border-color: #e1e1e1;
+    }
 
-        /* Solo descargar (sin flipbook) */
-        .desc-btn-download {
-            background: #f5f5f5;
-            color: #003ca6 !important;
-            border-color: #e1e1e1;
-        }
+    .desc-btn-download:hover {
+        background: #003ca6;
+        color: #fff !important;
+        border-color: #003ca6;
+    }
 
-        .desc-btn-download:hover {
-            background: #003ca6;
-            color: #fff !important;
-            border-color: #003ca6;
-        }
+    /* ── Modal flipbook ── */
+    .modal-flipbook-content {
+        border: none;
+        border-radius: 10px;
+        overflow: hidden;
+        background: #0c0805;
+        position: relative;
+    }
 
-        /* ── Modal flipbook ── */
-        .modal-flipbook-content {
-            border: none;
-            border-radius: 10px;
-            overflow: hidden;
-            background: #0c0805;
-            position: relative;
-        }
+    .modal-flipbook-close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 200;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(0, 0, 0, 0.6);
+        color: #fff;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        transition: background 0.2s;
+        backdrop-filter: blur(4px);
+    }
 
-        .modal-flipbook-close {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 200;
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background: rgba(0, 0, 0, 0.6);
-            color: #fff;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            transition: background 0.2s;
-            backdrop-filter: blur(4px);
-        }
+    .modal-flipbook-close:hover {
+        background: rgba(219, 6, 50, 0.85);
+        border-color: rgba(219, 6, 50, 0.5);
+    }
 
-        .modal-flipbook-close:hover {
-            background: rgba(219, 6, 50, 0.85);
-            border-color: rgba(219, 6, 50, 0.5);
-        }
+    /* ── Entrada Boletín 14 ─────────────────────────── */
+    .boletin-14-entry {
+        background: linear-gradient(135deg, #f0f7f0 0%, #e8f0fd 100%);
+        border-radius: 10px;
+        padding: 16px 20px !important;
+        border-left: 4px solid #003ca6;
+    }
 
-        /* ── Entrada Boletín 14 ─────────────────────────── */
-        .boletin-14-entry {
-            background: linear-gradient(135deg, #f0f7f0 0%, #e8f0fd 100%);
-            border-radius: 10px;
-            padding: 16px 20px !important;
-            border-left: 4px solid #003ca6;
-        }
+    /* Botón principal: abrir flipbook */
+    .btn-boletin-flipbook {
+        display: inline-flex;
+        align-items: center;
+        padding: 9px 20px;
+        background: #003ca6;
+        color: #fff;
+        border: none;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all .3s ease;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        box-shadow: 0 3px 12px rgba(0, 60, 166, .25);
+    }
 
-        /* Botón principal: abrir flipbook */
-        .btn-boletin-flipbook {
-            display: inline-flex;
-            align-items: center;
-            padding: 9px 20px;
-            background: #003ca6;
-            color: #fff;
-            border: none;
-            border-radius: 50px;
-            font-weight: 600;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all .3s ease;
-            text-transform: uppercase;
-            letter-spacing: .5px;
-            box-shadow: 0 3px 12px rgba(0, 60, 166, .25);
-        }
+    .btn-boletin-flipbook:hover {
+        background: #002d80;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 24px rgba(0, 60, 166, .35);
+    }
 
-        .btn-boletin-flipbook:hover {
-            background: #002d80;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 24px rgba(0, 60, 166, .35);
-        }
+    /* Botón secundario: descarga PDF */
+    .btn-boletin-pdf {
+        display: inline-flex;
+        align-items: center;
+        padding: 9px 16px;
+        background: #fff;
+        color: #56b276;
+        border: 2px solid #56b276;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all .3s ease;
+        text-decoration: none !important;
+    }
 
-        /* Botón secundario: descarga PDF */
-        .btn-boletin-pdf {
-            display: inline-flex;
-            align-items: center;
-            padding: 9px 16px;
-            background: #fff;
-            color: #56b276;
-            border: 2px solid #56b276;
-            border-radius: 50px;
-            font-weight: 600;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all .3s ease;
-            text-decoration: none !important;
-        }
+    .btn-boletin-pdf:hover {
+        background: #56b276;
+        color: #fff;
+        transform: translateY(-2px);
+    }
+</style>
+@stop
 
-        .btn-boletin-pdf:hover {
-            background: #56b276;
-            color: #fff;
-            transform: translateY(-2px);
-        }
-    </style>
-    @stop
+@section('customJS')
+@parent
+<script src="https://cdnjs.cloudflare.com/ajax/libs/waypoints/2.0.3/waypoints.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Counter-Up/1.0.0/jquery.counterup.min.js"></script>
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
-    @section('customJS')
-    @parent
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/waypoints/2.0.3/waypoints.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Counter-Up/1.0.0/jquery.counterup.min.js"></script>
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+<script>
+    function recaptchaCallback() {
+        $('#btnEnviar').removeAttr('disabled');
+    }
 
-    <script>
-        function recaptchaCallback() {
-            $('#btnEnviar').removeAttr('disabled');
-        }
+    $(function() {
 
-        $(function() {
-
-            /*----------  Numeralia  ----------*/
-            if ($(".count").length) {
-                $('.count').counterUp({
-                    delay: 10,
-                    time: 1000
-                });
-            }
-
-        });
-    </script>
-    <script>
-        $(function() {
-
-
-            /* ── Flipbook Modal — Boletín 14 ──────────────────
-               Carga el iframe SOLO al abrir el modal (lazy).
-               Al cerrar, limpia el src para liberar memoria.
-            ────────────────────────────────────────────────── */
-            $('#modalBoletinFlibook').on('show.bs.modal', function(e) {
-                var src = $(e.relatedTarget).data('src');
-                if (src) {
-                    $('#boletinViewerFrame').attr('src', src);
-                }
+        /*----------  Numeralia  ----------*/
+        if ($(".count").length) {
+            $('.count').counterUp({
+                delay: 10,
+                time: 1000
             });
+        }
 
-            $('#modalBoletinFlibook').on('hidden.bs.modal', function() {
-                // Limpiar iframe al cerrar — libera memoria y detiene PDF.js
-                $('#boletinViewerFrame').attr('src', '');
-            });
+    });
+</script>
+<script>
+    $(function() {
 
-            /* ── reCAPTCHA callback (existente, no tocar) ──── */
-            // recaptchaCallback ya declarado arriba en el JS inline de la vista
 
+        /* ── Flipbook Modal — Boletín 14 ──────────────────
+           Carga el iframe SOLO al abrir el modal (lazy).
+           Al cerrar, limpia el src para liberar memoria.
+        ────────────────────────────────────────────────── */
+        $('#modalBoletinFlibook').on('show.bs.modal', function(e) {
+            var src = $(e.relatedTarget).data('src');
+            if (src) {
+                $('#boletinViewerFrame').attr('src', src);
+            }
         });
-    </script>
-    @stop
+
+        $('#modalBoletinFlibook').on('hidden.bs.modal', function() {
+            // Limpiar iframe al cerrar — libera memoria y detiene PDF.js
+            $('#boletinViewerFrame').attr('src', '');
+        });
+
+        /* ── reCAPTCHA callback (existente, no tocar) ──── */
+        // recaptchaCallback ya declarado arriba en el JS inline de la vista
+
+    });
+</script>
+@stop

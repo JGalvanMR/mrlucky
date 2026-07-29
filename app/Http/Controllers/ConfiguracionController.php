@@ -20,8 +20,8 @@ class ConfiguracionController extends Controller
     public function editar(Request $request){
         $data = $request->all();
 
-        EnvEditor::editKey('APP_NAME', '"'.$data['app_name'].'"'); 
-        
+        EnvEditor::editKey('APP_NAME', '"'.$data['app_name'].'"');
+
         $config = new \Larapack\ConfigWriter\Repository('rentas');
         $config->set('logo', $request->logo);
         $config->set('logo_header', $request->logo_header);

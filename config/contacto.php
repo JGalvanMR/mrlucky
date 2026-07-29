@@ -28,7 +28,7 @@ return [
         // silencio o inventar un destinatario.
         'mantenimiento' => env('CONTACTO_MANTENIMIENTO', null),
 
-        'mercadotecnia' => env('CONTACTO_MERCADOTECNIA', 'mercadotecnia@mrlucky.com.mx'),
+        'mercadotecnia' => env('CONTACTO_MERCADOTECNIA', 'mercadotecnia@mrlucky.com.mx,adrian.ortega@mrlucky.com.mx'),
 
         // BUGFIX: el <option> original tenía el correo "msamano@mrluccky.com.mx"
         // (dominio con doble "c", typo). Se corrige a mrlucky.com.mx, que es el
@@ -42,7 +42,7 @@ return [
         // no tenía correo configurado (value=""). Esto explica por qué los
         // correos de prueba de Gerencia para Ventas Nacional nunca llegaron.
         // Debe confirmarse el correo real en CONTACTO_VENTAS_NACIONAL.
-        'ventas_nacional' => env('CONTACTO_VENTAS_NACIONAL', null),
+        'ventas_nacional' => env('CONTACTO_VENTAS_NACIONAL', 'ventas@mrlucky.com.mx'),
     ],
 
     /*

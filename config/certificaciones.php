@@ -25,6 +25,8 @@ return [
             'mercadotecnia@mrlucky.com.mx',
             'comprasmp@mrlucky.com.mx',
             'adrian.ortega@mrlucky.com.mx',
+            'ventas@mrlucky.com.mx',
+            'orders@mrlucky.com.mx',
             'jgalvan@mrlucky.com.mx',
         ])))
     )),

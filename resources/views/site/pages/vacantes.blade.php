@@ -24,7 +24,7 @@
 						<div class="col-12 col-md-4 mb-5">
 							<a href="{{ route( App::currentLocale() . '.vacante', ['slug' => $vacante->slug] ) }}" class="text-decoration-none">
 								<div class="vacante card p-2 rounded shadow h-100">
-									<img src="/uploads/{{ $vacante->imagen }}" class="img-fluid" alt="{{ $vacante->titulo }}" alt="{{ $vacante->titulo }}" loading="lazy">
+									<img src="/uploads/{{ $vacante->imagen }}" class="img-fluid" alt="{{ $vacante->titulo }}" loading="lazy">
 									<div class="px-3 pb-2 bg-verde">
 										<span class="f600 d-block gris text-center text-white m-0 p-2">{{ $vacante->titulo }}</span>
 									</div>
