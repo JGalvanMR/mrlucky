@@ -296,7 +296,7 @@
     .cert-hero {
         position: relative;
         background: linear-gradient(180deg, var(--cert-white) 0%, var(--cert-bg-light) 60%, #EDF2F9 100%);
-        padding: 35px 0 30px;
+        padding: 70px 0 60px;
         overflow: hidden;
         border-bottom: 1px solid var(--cert-border);
     }
@@ -692,7 +692,6 @@
         font-family: var(--cert-font);
         border: none;
         cursor: pointer;
-        color: var(--cert-white);
     }
 
     .cert-general-card-btn:hover {
@@ -704,7 +703,6 @@
 
     .cert-general-card-btn-ext {
         font-size: 10px;
-        color: var(--cert-white);
         opacity: .8;
     }
 

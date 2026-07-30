@@ -168,10 +168,6 @@ class SiteController extends Controller
     /*-----------------Certificaciones-----------------*/
     public function certificaciones()
     {
-        // ---> ESTA ES LA ÚNICA LÍNEA QUE NECESITAS AGREGAR <---
-        $idioma = $this->getLang();
-        // -----------------------------------------------------
-
         $tipoSlug = 'primusgfs';
 
         $tipoCertificacion = Cache::remember("tipo_cert.{$tipoSlug}", 3600, function () use ($tipoSlug) {
