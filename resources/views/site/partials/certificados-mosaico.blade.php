@@ -206,11 +206,12 @@ $vencidosCount = $totalCount - $vigentesCount;
                 </a>
                 <a href="{{ $cert->solicitud_descarga_url }}"
                     class="cert-btn-solicitar"
+                    style="Color: #ffffff"
                     data-analytics-event="certificate_request_open"
                     aria-label="{{ App::currentLocale() == 'es'
                                         ? 'Solicitar descarga del certificado de ' . $rancho->nombre
                                         : 'Request download of the certificate for ' . $rancho->nombre }}">
-                    <i class="fa fa-download mr-1" aria-hidden="true"></i>
+                    <i class="fa fa-download mr-1" aria-hidden="true" style="Color: #ffffff"></i>
                     {{ App::currentLocale() == 'es' ? 'Solicitar Descarga' : 'Request Download' }}
                 </a>
             </div>

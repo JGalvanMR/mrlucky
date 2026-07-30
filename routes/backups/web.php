@@ -71,15 +71,6 @@ Route::get('/en/certifications', [SiteController::class, 'certificaciones'])->na
 Route::get('/certificaciones/ver/{certificacion}', [CertificacionController::class, 'ver'])->name('certificaciones.ver');
 Route::get('/en/certifications/view/{certificacion}', [CertificacionController::class, 'ver'])->name('en.certificaciones.ver');
 
-Route::get('/certificaciones/solicitar-descarga-general/{slug}', [CertificacionController::class, 'solicitarDescargaGeneral'])
-    ->name('certificaciones.solicitar_descarga_general');
-
-Route::post('/certificaciones/solicitar-descarga-general/{slug}/enviar', [CertificacionController::class, 'enviarSolicitudGeneral'])
-    ->name('certificaciones.solicitar_descarga_general.enviar');
-
-Route::get('/certificaciones', [SiteController::class, 'certificaciones'])->name('es.certificaciones');
-Route::get('/en/certifications', [SiteController::class, 'certificaciones'])->name('en.certificaciones');
-
 // Solicitud de descarga: el usuario ya NO puede descargar el PDF directamente.
 // Debe llenar un formulario; la solicitud se envía por correo al área
 // responsable, que decide cómo entregar el documento (ver punto 12 del requerimiento).
