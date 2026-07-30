@@ -80,55 +80,71 @@
                 // el botón aparece deshabilitado.
                 // ───────────────────────────────────────────────────────
                 $certificadosGenerales = [
-                [
-                'slug' => 'ccof', 'img' => '01.jpg', 'alt' => 'CCOF',
-                'name' => 'CCOF',
-                'desc_es' => 'Certificación de productos orgánicos emitida por California Certified Organic Farmers, líder en agricultura orgánica desde 1973.',
-                'desc_en' => 'Organic products certification issued by California Certified Organic Farmers, a leader in organic agriculture since 1973.',
-                ],
-                [
-                'slug' => 'c-tpat', 'img' => '02.jpg', 'alt' => 'C-TPAT',
-                'name' => 'C-TPAT',
-                'desc_es' => 'Asociación Aduana-Comercio contra el Terrorismo. Programa voluntario de seguridad en la cadena de suministro internacional.',
-                'desc_en' => 'Customs-Trade Partnership Against Terrorism. A voluntary international supply chain security program.',
-                ],
-                [
-                'slug' => 'sqf', 'img' => '04.jpg', 'alt' => 'SQF',
-                'name' => 'SQF',
-                'desc_es' => 'Estándar reconocido por la GFSI que garantiza la inocuidad y calidad en toda la cadena de producción de alimentos.',
-                'desc_en' => 'GFSI-recognized standard that guarantees food safety and quality throughout the entire food production chain.',
-                ],
-                [
-                'slug' => 'kosher', 'img' => '03.jpg', 'alt' => 'Kosher',
-                'name' => 'Kosher',
-                'desc_es' => 'Certificación que avala el cumplimiento de los requisitos alimentarios Kosher en nuestros procesos y productos.',
-                'desc_en' => 'Certification that endorses compliance with Kosher food requirements in our processes and products.',
-                ],
-                [
-                'slug' => 'ftusa', 'img' => '06.jpg', 'alt' => 'FTUSA',
-                'name' => 'FT USA',
-                'desc_es' => 'Certificación que respalda nuestras operaciones comerciales y el cumplimiento de regulaciones del mercado estadounidense.',
-                'desc_en' => 'Certification that supports our commercial operations and compliance with U.S. market regulations.',
-                ],
-                [
-                'slug' => 'smeta', 'img' => '05.jpg', 'alt' => 'SMETA',
-                'name' => 'SMETA',
-                'desc_es' => 'Auditoría de prácticas comerciales éticas que evalúa condiciones laborales, salud, seguridad y medio ambiente.',
-                'desc_en' => 'Ethical trade practices audit that evaluates labor conditions, health, safety, and the environment.',
-                ],
-                [
-                'slug' => '', 'img' => '07.jpg', 'alt' => 'Certificación',
-                'name' => '',
-                'desc_es' => 'Estamos en proceso de obtener nuevas certificaciones para seguir elevando nuestros estándares de calidad.',
-                'desc_en' => 'We are in the process of obtaining new certifications to continue raising our quality standards.',
-                ],
-                [
-                'slug' => '', 'img' => '08.png', 'alt' => 'Certificación',
-                'name' => '',
-                'desc_es' => 'Estamos en proceso de obtener nuevas certificaciones para seguir elevando nuestros estándares de calidad.',
-                'desc_en' => 'We are in the process of obtaining new certifications to continue raising our quality standards.',
-                ],
-                ];
+    [
+        'slug' => 'ccof',
+        'img' => '01.jpg',
+        'alt' => 'CCOF',
+        'name' => 'CCOF',
+        'desc_es' => 'Certificación de productos orgánicos emitida por California Certified Organic Farmers, líder en agricultura orgánica desde 1973.',
+        'desc_en' => 'Organic products certification issued by California Certified Organic Farmers, a leader in organic agriculture since 1973.',
+    ],
+    [
+        'slug' => 'c-tpat',
+        'img' => '07.jpg',
+        'alt' => 'C-TPAT',
+        'name' => 'C-TPAT',
+        'desc_es' => 'Asociación Aduana-Comercio contra el Terrorismo. Programa voluntario de seguridad que fortalece la protección de la cadena de suministro internacional y facilita el comercio seguro.',
+        'desc_en' => 'Customs-Trade Partnership Against Terrorism. A voluntary security program that strengthens international supply chain protection and facilitates secure trade.',
+    ],
+    [
+        'slug' => 'ftusa',
+        'img' => '06.jpg',
+        'alt' => 'FTUSA',
+        'name' => 'FT USA',
+        'desc_es' => 'Certificación que respalda nuestras operaciones comerciales y el cumplimiento de regulaciones del mercado estadounidense.',
+        'desc_en' => 'Certification that supports our commercial operations and compliance with U.S. market regulations.',
+    ],
+    [
+        'slug' => 'global-gap',
+        'img' => '08.png',
+        'alt' => 'GLOBAL G.A.P.',
+        'name' => 'GLOBAL G.A.P.',
+        'desc_es' => 'Certificación internacional que garantiza buenas prácticas agrícolas, promoviendo la inocuidad de los alimentos, la sostenibilidad y la responsabilidad ambiental y social en los procesos de producción.',
+        'desc_en' => 'International certification that ensures good agricultural practices, promoting food safety, sustainability, and environmental and social responsibility throughout production processes.',
+    ],
+    [
+        'slug' => 'kosher',
+        'img' => '03.jpg',
+        'alt' => 'Kosher',
+        'name' => 'Kosher',
+        'desc_es' => 'Certificación que avala el cumplimiento de los requisitos alimentarios Kosher en nuestros procesos y productos.',
+        'desc_en' => 'Certification that endorses compliance with Kosher food requirements in our processes and products.',
+    ],
+    [
+        'slug' => 'smeta',
+        'img' => '05.jpg',
+        'alt' => 'SMETA',
+        'name' => 'SMETA',
+        'desc_es' => 'Auditoría de prácticas comerciales éticas que evalúa condiciones laborales, salud, seguridad y medio ambiente.',
+        'desc_en' => 'Ethical trade practices audit that evaluates labor conditions, health, safety, and the environment.',
+    ],
+    [
+        'slug' => 'sqf',
+        'img' => '04.jpg',
+        'alt' => 'SQF',
+        'name' => 'SQF',
+        'desc_es' => 'Estándar reconocido por la GFSI que garantiza la inocuidad y calidad en toda la cadena de producción de alimentos.',
+        'desc_en' => 'GFSI-recognized standard that guarantees food safety and quality throughout the entire food production chain.',
+    ],
+    [
+        'slug' => 'usda-organic',
+        'img' => '02.jpg',
+        'alt' => 'USDA Organic',
+        'name' => 'USDA Organic',
+        'desc_es' => 'Certificación del Departamento de Agricultura de los Estados Unidos que garantiza que los productos cumplen con los estándares establecidos para la producción y manejo de productos orgánicos.',
+        'desc_en' => 'Certification from the United States Department of Agriculture that guarantees products comply with established standards for organic production and handling.',
+    ],
+];
                 @endphp
 
                 @foreach($certificadosGenerales as $cert)
@@ -166,8 +182,8 @@
                             aria-label="{{ App::currentLocale() == 'es'
                                                 ? 'Ver certificado ' . $cert['name'] . ' en PDF (se abre en nueva pestaña)'
                                                 : 'View ' . $cert['name'] . ' certificate PDF (opens in a new tab)' }}">
-                            <i class="fa fa-file-pdf-o" aria-hidden="true"></i>
-                            <span>{{ App::currentLocale() == 'es' ? 'Ver Certificado' : 'View Certificate' }}</span>
+                            <i style="color: white;" class="fa fa-file-pdf-o" aria-hidden="true"></i>
+                            <span style="color: white;">{{ App::currentLocale() == 'es' ? 'Ver Certificado' : 'View Certificate' }}</span>
                             <i class="fa fa-external-link cert-general-card-btn-ext" aria-hidden="true"></i>
                         </a>
                         @else
@@ -692,7 +708,6 @@
         font-family: var(--cert-font);
         border: none;
         cursor: pointer;
-        color: var(--cert-white);
     }
 
     .cert-general-card-btn:hover {
@@ -704,7 +719,6 @@
 
     .cert-general-card-btn-ext {
         font-size: 10px;
-        color: var(--cert-white);
         opacity: .8;
     }
 
@@ -1111,7 +1125,7 @@
         gap: 6px;
         width: 100%;
         padding: 10px 12px;
-        background: var(--cert-rojo);
+        background: #D50032;
         color: var(--cert-white) !important;
         border-radius: 7px;
         font-size: 12px;

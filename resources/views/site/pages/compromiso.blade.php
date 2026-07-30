@@ -55,43 +55,43 @@ $active = 'compromiso';
                         {{-- ── Logos de certificaciones existentes (sin cambios) ── --}}
                         <div class="row text-center">
                             <div class="col-7 col-md">
-                                <a href="{{ route(App::currentLocale() == 'en' ? 'en.certificaciones.ver_general' : 'certificaciones.ver_general', 'ccof') }}" target="_blank">
+                                <a href="{{ route(App::currentLocale() . '.certificaciones') }}">
                                     <img src="/site/img/certificaciones/01.jpg" class="img-fluid" loading="lazy" alt="CCOF">
                                 </a>
                             </div>
                             <div class="col-7 col-md">
-                                <a href="{{ route(App::currentLocale() == 'en' ? 'en.certificaciones.ver_general' : 'certificaciones.ver_general', 'c-tpat') }}" target="_blank">
-                                    <img src="/site/img/certificaciones/02.jpg" class="img-fluid" loading="lazy" alt="C-TPAT">
+                                <a href="{{ route(App::currentLocale() . '.certificaciones') }}">
+                                    <img src="/site/img/certificaciones/07.jpg" class="img-fluid" loading="lazy" alt="USDA">
                                 </a>
                             </div>
                             <div class="col-7 col-md">
-                                <a href="{{ route(App::currentLocale() == 'en' ? 'en.certificaciones.ver_general' : 'certificaciones.ver_general', 'sqf') }}" target="_blank">
-                                    <img src="/site/img/certificaciones/04.jpg" class="img-fluid" loading="lazy" alt="SQF">
-                                </a>
-                            </div>
-                            <div class="col-7 col-md">
-                                <a href="{{ route(App::currentLocale() == 'en' ? 'en.certificaciones.ver_general' : 'certificaciones.ver_general', 'kosher') }}" target="_blank">
-                                    <img src="/site/img/certificaciones/03.jpg" class="img-fluid" loading="lazy" alt="Kosher">
-                                </a>
-                            </div>
-                            <div class="col-7 col-md">
-                                <a href="{{ route(App::currentLocale() == 'en' ? 'en.certificaciones.ver_general' : 'certificaciones.ver_general', 'ftusa') }}" target="_blank">
+                                <a href="{{ route(App::currentLocale() . '.certificaciones') }}">
                                     <img src="/site/img/certificaciones/06.jpg" class="img-fluid" loading="lazy" alt="FTUSA">
                                 </a>
                             </div>
                             <div class="col-7 col-md">
-                                <a href="{{ route(App::currentLocale() == 'en' ? 'en.certificaciones.ver_general' : 'certificaciones.ver_general', 'smeta') }}" target="_blank">
+                                <a href="{{ route(App::currentLocale() . '.certificaciones') }}">
+                                    <img src="/site/img/certificaciones/08.png" class="img-fluid" loading="lazy" alt="GLOBALGAP">
+                                </a>
+                            </div>
+                            <div class="col-7 col-md">
+                                <a href="{{ route(App::currentLocale() . '.certificaciones') }}">
+                                    <img src="/site/img/certificaciones/03.jpg" class="img-fluid" loading="lazy" alt="Kosher">
+                                </a>
+                            </div>
+                            <div class="col-7 col-md">
+                                <a href="{{ route(App::currentLocale() . '.certificaciones') }}">
                                     <img src="/site/img/certificaciones/05.jpg" class="img-fluid" loading="lazy" alt="SMETA">
                                 </a>
                             </div>
                             <div class="col-7 col-md">
-                                <a href="" target="_blank">
-                                    <img src="/site/img/certificaciones/07.jpg" class="img-fluid" loading="lazy" alt="">
+                                <a href="{{ route(App::currentLocale() . '.certificaciones') }}">
+                                    <img src="/site/img/certificaciones/04.jpg" class="img-fluid" loading="lazy" alt="SQF">
                                 </a>
                             </div>
                             <div class="col-7 col-md">
-                                <a href="" target="_blank">
-                                    <img src="/site/img/certificaciones/08.png" class="img-fluid" loading="lazy" alt="">
+                                <a href="{{ route(App::currentLocale() . '.certificaciones') }}">
+                                    <img src="/site/img/certificaciones/02.jpg" class="img-fluid" loading="lazy" alt="C-TPAT">
                                 </a>
                             </div>
                         </div>

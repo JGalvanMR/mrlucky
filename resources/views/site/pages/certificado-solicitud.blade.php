@@ -279,9 +279,9 @@ $rutaEnvio = App::currentLocale() == 'en'
                                 </div>
 
                                 <button type="submit" class="cert-btn-submit" id="btnEnviarSolicitud">
-                                    <i class="fa fa-paper-plane" aria-hidden="true"></i>
-                                    <span>{{ App::currentLocale() == 'es' ? 'Enviar solicitud' : 'Submit request' }}</span>
-                                    <i class="fa fa-spinner fa-spin cert-btn-spinner" aria-hidden="true" style="display:none;"></i>
+                                    <i class="fa fa-paper-plane" aria-hidden="true" style="color: #ffffff"></i>
+                                    <span style="color: #ffffff">{{ App::currentLocale() == 'es' ? 'Enviar solicitud' : 'Submit request' }}</span>
+                                    <i class="fa fa-spinner fa-spin cert-btn-spinner" aria-hidden="true" style="display:none; color: #ffffff"></i>
                                 </button>
                             </form>
                         </div>
